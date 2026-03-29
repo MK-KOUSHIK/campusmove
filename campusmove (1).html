@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CampusMove — Live Bus Tracker</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+:root{
+  --bg:#0a0e1a;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;
+  --accent:#00d4ff;--accent2:#ff6b35;--green:#00e676;--red:#ff4757;
+  --text:#e8edf5;--muted:#6b7fa3;--card:#141d2e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+.screen{display:none;height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* LOGIN */
+#screen-login{
+  align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 20% 50%,#0d1f3c,var(--bg) 60%);
+  position:relative;
+}
+#screen-login::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;opacity:0.3;
+}
+.login-card{
+  background:var(--card);border:1px solid var(--border);border-radius:24px;
+  padding:44px 40px;width:100%;max-width:420px;
+  position:relative;z-index:1;
+  box-shadow:0 32px 80px rgba(0,0,0,.5);
+  animation:fadeUp .5s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:30px;}
+.brand-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#0088cc);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;background:linear-gradient(135deg,var(--accent),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.login-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px;}
+.login-sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:20px;gap:4px;}
+.role-tab{padding:10px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;background:transparent;color:var(--muted);transition:all .2s;}
+.role-tab.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.fw{position:relative;}
+.fw span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+.fw input{
+  width:100%;padding:12px 13px 12px 40px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:15px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.fw input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1);}
+.fw input::placeholder{color:var(--muted);}
+.err-msg{
+  background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);
+  border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);
+  margin-bottom:12px;display:none;
+}
+.btn-login{
+  width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#0099bb);
+  border:none;border-radius:12px;color:#000;
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .2s;margin-top:4px;
+}
+.btn-login:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.3);}
+.btn-login:disabled{opacity:.6;cursor:not-allowed;}
+.hint{text-align:center;margin-top:16px;font-size:12px;color:var(--muted);line-height:2;}
+.hint b{color:var(--accent);}
+
+/* TOPNAV */
+.topnav{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  height:58px;padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.nav-l{display:flex;align-items:center;gap:10px;}
+.nav-ico{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),#0088cc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.nav-t{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;}
+.nav-r{display:flex;align-items:center;gap:10px;}
+.badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+.badge-d{background:rgba(255,107,53,.12);color:var(--accent2);border:1px solid rgba(255,107,53,.25);}
+.badge-s{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.btn-out{padding:6px 14px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;}
+.btn-out:hover{border-color:var(--red);color:var(--red);}
+
+/* DRIVER BODY */
+#screen-driver .body{flex:1;overflow-y:auto;padding:24px 18px;max-width:540px;margin:0 auto;width:100%;}
+.drv-head{margin-bottom:20px;}
+.drv-head h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
+.drv-head p{color:var(--muted);font-size:13px;margin-top:3px;}
+.bus-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.bus-card::after{content:'🚌';position:absolute;right:18px;top:16px;font-size:42px;opacity:.12;pointer-events:none;}
+.bc-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.bc-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px;}
+.chips{display:flex;gap:9px;flex-wrap:wrap;}
+.chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;background:var(--surface2);border:1px solid var(--border);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.dot.on{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.5s infinite;}
+.dot.gps{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.ctrls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.btn-start{
+  padding:18px;border-radius:15px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--green),#00b050);
+  color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .25s;
+}
+.btn-start:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,230,118,.35);}
+.btn-start:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.btn-stop{
+  padding:18px;border-radius:15px;cursor:pointer;
+  background:var(--surface2);border:2px solid var(--border);
+  color:var(--muted);font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .25s;
+}
+.btn-stop:hover:not(:disabled){border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08);}
+.btn-stop:disabled{opacity:.3;cursor:not-allowed;}
+.btn-ico{font-size:26px;}
+.gps-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;}
+.gc-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ci{background:var(--surface);border-radius:11px;padding:12px;}
+.ci-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ci-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent);}
+.ci-val.dim{color:var(--muted);font-weight:400;}
+.timer-wrap{text-align:center;margin-top:14px;}
+.timer-lbl{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.timer{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:.04em;}
+
+/* STUDENT LAYOUT */
+#screen-student .body{flex:1;display:flex;overflow:hidden;}
+.sidebar{
+  width:290px;flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sb-head{padding:16px;border-bottom:1px solid var(--border);}
+.sb-head h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:2px;}
+.sb-head p{font-size:12px;color:var(--muted);}
+.bus-list{flex:1;overflow-y:auto;padding:10px;}
+.bus-list::-webkit-scrollbar{width:3px;}
+.bus-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.bus-item{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:13px;margin-bottom:8px;
+  cursor:pointer;transition:all .2s;
+}
+.bus-item:hover{border-color:rgba(0,212,255,.3);}
+.bus-item.live{border-left:3px solid var(--green);}
+.bi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.bi-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.bi-badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;}
+.bi-live{background:rgba(0,230,118,.12);color:var(--green);}
+.bi-off{background:rgba(107,127,163,.15);color:var(--muted);}
+.bi-sub{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.bi-coords{font-size:11px;color:var(--muted);font-family:monospace;}
+.no-buses{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:10px;color:var(--muted);
+  padding:24px;text-align:center;
+}
+.no-buses span{font-size:36px;opacity:.3;}
+.no-buses p{font-size:12px;line-height:1.6;}
+
+/* MAP */
+.map-wrap{flex:1;position:relative;}
+#leaflet-map{width:100%;height:100%;}
+.leaflet-tile{filter:brightness(.65) saturate(.7) hue-rotate(195deg);}
+.leaflet-container{background:#0a0e1a;}
+.leaflet-popup-content-wrapper{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.leaflet-popup-tip{background:var(--card);}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(70px);
+  background:var(--surface2);border:1px solid var(--border);
+  padding:10px 20px;border-radius:12px;font-size:14px;
+  box-shadow:0 12px 32px rgba(0,0,0,.4);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  z-index:9999;white-space:nowrap;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:rgba(0,230,118,.4);color:var(--green);}
+.toast.error{border-color:rgba(255,71,87,.4);color:var(--red);}
+
+@media(max-width:640px){
+  .login-card{margin:16px;padding:30px 22px;}
+  .sidebar{width:100%;max-height:220px;border-right:none;border-bottom:1px solid var(--border);}
+  #screen-student .body{flex-direction:column;}
+  .map-wrap{flex:1;min-height:320px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-icon">🚌</div>
+      <div>
+        <div class="brand-name">CampusMove</div>
+        <div class="brand-sub">Live Bus Tracking</div>
+      </div>
+    </div>
+    <div class="login-title" id="auth-title">Welcome back</div>
+    <div class="login-sub" id="auth-sub">Sign in to access your dashboard</div>
+
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="switchRole('driver')">🚗 Driver</button>
+      <button class="role-tab"        onclick="switchRole('student')">🎓 Student / Faculty</button>
+    </div>
+
+    <div id="login-err" class="err-msg"></div>
+
+    <div class="field">
+      <label id="uid-label">Driver Email</label>
+      <div class="fw"><span>✉️</span>
+        <input id="login-email" type="email" placeholder="you@college.edu"
+               autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="fw"><span>🔒</span>
+        <input id="login-pw" type="password" placeholder="Enter password"
+               autocomplete="current-password"/>
+      </div>
+    </div>
+
+    <button class="btn-login" id="btn-login" onclick="doLogin()">Sign In →</button>
+
+    <!-- Confirm password for signup (hidden by default) -->
+    <div class="field" id="field-confirm" style="display:none;margin-top:14px;">
+      <label>Confirm Password</label>
+      <div class="fw"><span>🔒</span>
+        <input id="login-pw2" type="password" placeholder="Repeat password"
+               autocomplete="new-password"/>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted);">
+      <span id="auth-toggle-text">Don't have an account?</span>
+      <button id="auth-toggle-btn" onclick="toggleAuthMode()"
+        style="background:none;border:none;color:var(--accent);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-left:4px;text-decoration:underline;">Sign Up</button>
+    </div>
+
+    <div class="hint">
+      Drivers: use a college email &amp; sign up as <b>Driver</b>.<br>
+      Students/Faculty: sign up as <b>Student / Faculty</b>.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ DRIVER ══════════════ -->
+<div id="screen-driver" class="screen">
+  <nav class="topnav">
+    <div class="nav-l">
+      <div class="nav-ico">🚌</div>
+      <div class="nav-t">CampusMove</div>
+    </div>
+    <div class="nav-r">
+      <div class="badge badge-d">🚗 Driver</div>
+      <span style="font-size:12px;color:var(--muted)" id="drv-email"></span>
+      <button class="btn-out" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="body">
+    <div class="drv-head">
+      <h1>Driver Dashboard</h1>
+      <p>Your GPS will be broadcast live to students when trip is active.</p>
+    </div>
+
+    <div class="bus-card">
+      <div class="bc-lbl">Trip Status</div>
+      <div class="bc-val">Ready to depart</div>
+      <div class="chips">
+        <div class="chip"><div class="dot" id="trip-dot"></div><span id="trip-txt">Trip Inactive</span></div>
+        <div class="chip"><div class="dot" id="gps-dot"></div><span id="gps-txt">GPS Standby</span></div>
+      </div>
+    </div>
+
+    <div class="ctrls">
+      <button class="btn-start" id="btn-start" onclick="startTrip()">
+        <span class="btn-ico">▶️</span>Start Trip
+      </button>
+      <button class="btn-stop" id="btn-stop" onclick="stopTrip()" disabled>
+        <span class="btn-ico">⏹</span>Stop Trip
+      </button>
+    </div>
+
+    <div class="gps-card">
+      <div class="gc-title">📡 Live GPS Feed → Firebase</div>
+      <div class="cg">
+        <div class="ci"><div class="ci-lbl">Latitude</div> <div class="ci-val dim" id="coord-lat">—</div></div>
+        <div class="ci"><div class="ci-lbl">Longitude</div><div class="ci-val dim" id="coord-lng">—</div></div>
+        <div class="ci"><div class="ci-lbl">Accuracy</div> <div class="ci-val dim" id="coord-acc">—</div></div>
+        <div class="ci"><div class="ci-lbl">Updates sent</div><div class="ci-val dim" id="coord-updates">0</div></div>
+      </div>
+      <div class="timer-wrap">
+        <div class="timer-lbl">Trip Duration</div>
+        <div class="timer" id="trip-timer">00:00:00</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ STUDENT ══════════════ -->
+<div id="screen-student" class="screen">
+  <nav class="topnav">
+    <div class="nav-l">
+      <div class="nav-ico">🚌</div>
+      <div class="nav-t">CampusMove</div>
+    </div>
+    <div class="nav-r">
+      <div class="badge badge-s">🎓 Student</div>
+      <button class="btn-out" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="body">
+    <div class="sidebar">
+      <div class="sb-head">
+        <h2>🚌 Live Buses</h2>
+        <p>Click a bus to locate it on the map</p>
+      </div>
+      <div class="bus-list" id="bus-list">
+        <div class="no-buses" id="no-buses-msg">
+          <span>🚌</span>
+          <p>No active buses right now.<br>Waiting for drivers to start trips…</p>
+        </div>
+      </div>
+    </div>
+    <div class="map-wrap">
+      <div id="leaflet-map"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════ FIREBASE + APP LOGIC ══════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, set, onValue }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+/* ── YOUR FIREBASE CONFIG ── */
+const firebaseConfig = {
+  apiKey: "AIzaSyCM3QrnBjQo_VzryDeLd1V5NFAK5sYnXfM",
+  authDomain: "campusmove-252d9.firebaseapp.com",
+  databaseURL: "https://campusmove-252d9-default-rtdb.firebaseio.com",
+  projectId: "campusmove-252d9",
+  storageBucket: "campusmove-252d9.firebasestorage.app",
+  messagingSenderId: "205559098425",
+  appId: "1:205559098425:web:d31f001cd064e52fb371e8"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth        = getAuth(firebaseApp);
+const db          = getDatabase(firebaseApp);
+
+/* ── STATE ── */
+let currentUser   = null;
+let currentRole   = "driver";
+let gpsWatchId    = null;
+let tripActive    = false;
+let timerInterval = null;
+let tripStart     = null;
+let updateCount   = 0;
+let studentMap    = null;
+let busMarkers    = {};
+let authMode      = "signin"; // "signin" | "signup"
+
+/* ── AUTH MODE TOGGLE ── */
+window.toggleAuthMode = () => {
+  authMode = authMode === "signin" ? "signup" : "signin";
+  const isSignup = authMode === "signup";
+  document.getElementById("auth-title").textContent      = isSignup ? "Create Account" : "Welcome back";
+  document.getElementById("auth-sub").textContent        = isSignup ? "Sign up to get started" : "Sign in to access your dashboard";
+  document.getElementById("btn-login").textContent       = isSignup ? "Sign Up →" : "Sign In →";
+  document.getElementById("btn-login").onclick           = isSignup ? doSignup : doLogin;
+  document.getElementById("auth-toggle-text").textContent = isSignup ? "Already have an account?" : "Don't have an account?";
+  document.getElementById("auth-toggle-btn").textContent  = isSignup ? "Sign In" : "Sign Up";
+  document.getElementById("field-confirm").style.display  = isSignup ? "block" : "none";
+  document.getElementById("login-pw").placeholder         = isSignup ? "Create password (6+ chars)" : "Enter password";
+  document.getElementById("login-pw").autocomplete        = isSignup ? "new-password" : "current-password";
+  document.getElementById("login-err").style.display = "none";
+};
+
+/* ── ROLE SWITCH ── */
+window.switchRole = role => {
+  currentRole = role;
+  document.querySelectorAll(".role-tab").forEach((t,i) =>
+    t.classList.toggle("active",
+      (i===0 && role==="driver") || (i===1 && role==="student")));
+  document.getElementById("uid-label").textContent =
+    role==="driver" ? "Driver Email" : "Student / Faculty Email";
+};
+
+/* ── SIGN UP ── */
+window.doSignup = async () => {
+  const email = document.getElementById("login-email").value.trim();
+  const pw    = document.getElementById("login-pw").value;
+  const pw2   = document.getElementById("login-pw2").value;
+  const err   = document.getElementById("login-err");
+  const btn   = document.getElementById("btn-login");
+  err.style.display = "none";
+  if(!email || !pw || !pw2){ err.textContent = "❌ Please fill in all fields."; err.style.display="block"; return; }
+  if(pw !== pw2){ err.textContent = "❌ Passwords do not match."; err.style.display="block"; return; }
+  if(pw.length < 6){ err.textContent = "❌ Password must be at least 6 characters."; err.style.display="block"; return; }
+  btn.disabled = true; btn.textContent = "Creating account…";
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    currentUser = cred.user;
+    await set(ref(db, `users/${currentUser.uid}`), { role: currentRole, email });
+    showToast("🎉 Account created! Welcome to CampusMove.", "success");
+    launchDashboard();
+  } catch(e) {
+    err.textContent = "❌ " + friendlySignupErr(e.code);
+    err.style.display = "block";
+  } finally {
+    btn.disabled = false; btn.textContent = "Sign Up →";
+  }
+};
+
+function friendlySignupErr(c){
+  if(c==="auth/email-already-in-use") return "This email is already registered. Try signing in.";
+  if(c==="auth/invalid-email") return "Invalid email format.";
+  if(c==="auth/weak-password") return "Password is too weak. Use at least 6 characters.";
+  return "Sign up failed. Please try again.";
+}
+
+/* ── LOGIN ── */
+window.doLogin = async () => {
+  const email = document.getElementById("login-email").value.trim();
+  const pw    = document.getElementById("login-pw").value;
+  const err   = document.getElementById("login-err");
+  const btn   = document.getElementById("btn-login");
+  err.style.display = "none";
+  if(!email || !pw){ err.textContent = "❌ Please enter email and password."; err.style.display="block"; return; }
+  btn.disabled = true; btn.textContent = "Signing in…";
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pw);
+    currentUser = cred.user;
+    // Save role mapping in DB
+    await set(ref(db, `users/${currentUser.uid}`), { role: currentRole, email });
+    launchDashboard();
+  } catch(e) {
+    err.textContent = "❌ " + friendlyErr(e.code);
+    err.style.display = "block";
+  } finally {
+    btn.disabled = false; btn.textContent = "Sign In →";
+  }
+};
+document.addEventListener("keydown", e => {
+  if(e.key==="Enter") authMode === "signup" ? window.doSignup() : window.doLogin();
+});
+
+function friendlyErr(c){
+  if(["auth/user-not-found","auth/wrong-password","auth/invalid-credential"].includes(c))
+    return "Invalid email or password.";
+  if(c==="auth/invalid-email") return "Invalid email format.";
+  if(c==="auth/too-many-requests") return "Too many attempts. Try again later.";
+  return "Login failed. Please try again.";
+}
+
+onAuthStateChanged(auth, u => { if(!u) showScreen("login"); });
+
+/* ── LAUNCH ── */
+function launchDashboard(){
+  if(currentRole==="driver"){
+    document.getElementById("drv-email").textContent = currentUser.email;
+    showScreen("driver");
+  } else {
+    showScreen("student");
+    initMap();
+    listenBuses();
+  }
+}
+
+/* ── LOGOUT ── */
+window.doLogout = async () => {
+  stopTrip();
+  await signOut(auth);
+  showScreen("login");
+  document.getElementById("login-email").value = "";
+  document.getElementById("login-pw").value = "";
+};
+
+/* ────────────────────────────────────────
+   DRIVER — START TRIP
+──────────────────────────────────────── */
+window.startTrip = () => {
+  if(tripActive) return;
+  if(!navigator.geolocation){
+    showToast("❌ Geolocation not supported on this device", "error");
+    return;
+  }
+  tripActive  = true;
+  updateCount = 0;
+  tripStart   = Date.now();
+  setDriverUI(true);
+  showToast("📡 Trip started! Broadcasting GPS to students…", "success");
+  timerInterval = setInterval(tickTimer, 1000);
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    pos => {
+      const { latitude:lat, longitude:lng, accuracy } = pos.coords;
+
+      // ✅ Write real GPS to Firebase — students see this instantly
+      set(ref(db, `buses/${currentUser.uid}`), {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        lat, lng,
+        accuracy: Math.round(accuracy),
+        active: true,
+        updatedAt: Date.now()
+      });
+
+      // Update driver screen
+      document.getElementById("coord-lat").textContent = lat.toFixed(6);
+      document.getElementById("coord-lng").textContent = lng.toFixed(6);
+      document.getElementById("coord-acc").textContent = Math.round(accuracy)+" m";
+      updateCount++;
+      document.getElementById("coord-updates").textContent = updateCount;
+      ["coord-lat","coord-lng","coord-acc","coord-updates"]
+        .forEach(id => document.getElementById(id).classList.remove("dim"));
+    },
+    err => {
+      showToast("⚠️ GPS error: "+err.message, "error");
+    },
+    { enableHighAccuracy:true, maximumAge:3000, timeout:10000 }
+  );
+};
+
+/* ── STOP TRIP ── */
+window.stopTrip = () => {
+  if(!tripActive && gpsWatchId===null) return;
+  tripActive = false;
+  if(gpsWatchId!==null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId=null; }
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+  if(currentUser){
+    set(ref(db, `buses/${currentUser.uid}/active`), false);
+    set(ref(db, `buses/${currentUser.uid}/updatedAt`), Date.now());
+  }
+  setDriverUI(false);
+  ["coord-lat","coord-lng","coord-acc"].forEach(id => {
+    document.getElementById(id).textContent = "—";
+    document.getElementById(id).classList.add("dim");
+  });
+  document.getElementById("coord-updates").textContent = "0";
+  document.getElementById("trip-timer").textContent = "00:00:00";
+  showToast("✅ Trip ended successfully.", "success");
+};
+
+function setDriverUI(on){
+  document.getElementById("btn-start").disabled = on;
+  document.getElementById("btn-stop").disabled  = !on;
+  document.getElementById("trip-dot").className = "dot"+(on?" on":"");
+  document.getElementById("trip-txt").textContent = on?"Trip Active":"Trip Inactive";
+  document.getElementById("gps-dot").className  = "dot"+(on?" gps":"");
+  document.getElementById("gps-txt").textContent  = on?"GPS Active":"GPS Standby";
+}
+
+function tickTimer(){
+  const s   = Math.floor((Date.now()-tripStart)/1000);
+  const h   = String(Math.floor(s/3600)).padStart(2,"0");
+  const m   = String(Math.floor((s%3600)/60)).padStart(2,"0");
+  const sec = String(s%60).padStart(2,"0");
+  document.getElementById("trip-timer").textContent = `${h}:${m}:${sec}`;
+}
+
+/* ────────────────────────────────────────
+   STUDENT — LEAFLET MAP
+──────────────────────────────────────── */
+function initMap(){
+  if(studentMap) return;
+  studentMap = L.map("leaflet-map",{ zoomControl:true }).setView([12.9716,77.5946],13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    attribution:"© OpenStreetMap contributors", maxZoom:19
+  }).addTo(studentMap);
+}
+
+/* ── LISTEN TO ALL BUSES LIVE ── */
+function listenBuses(){
+  const busesRef = ref(db,"buses");
+  onValue(busesRef, snap => {
+    const data = snap.val();
+    const list = document.getElementById("bus-list");
+    const noMsg = document.getElementById("no-buses-msg");
+
+    if(!data){
+      // Remove all markers
+      Object.values(busMarkers).forEach(m => studentMap.removeLayer(m));
+      busMarkers = {};
+      list.innerHTML = "";
+      list.appendChild(noMsg);
+      noMsg.style.display = "flex";
+      return;
+    }
+
+    noMsg.style.display = "none";
+
+    // Remove stale markers
+    Object.keys(busMarkers).forEach(id => {
+      if(!data[id]){ studentMap.removeLayer(busMarkers[id]); delete busMarkers[id]; }
+    });
+
+    // Update / add markers and sidebar
+    Object.entries(data).forEach(([uid, bus]) => placeBus(uid, bus));
+    renderSidebar(data);
+  });
+}
+
+function placeBus(uid, bus){
+  if(!bus.lat || !bus.lng) return;
+  const name    = bus.email ? bus.email.split("@")[0] : "Bus";
+  const isLive  = bus.active === true;
+  const color   = isLive ? "#ff6b35" : "#6b7fa3";
+  const glow    = isLive ? "0 0 0 6px rgba(255,107,53,.25),0 0 20px rgba(255,107,53,.4)" : "none";
+
+  const icon = L.divIcon({
+    className:"",
+    html:`<div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="
+        width:42px;height:42px;border-radius:50%;
+        background:${color};
+        display:flex;align-items:center;justify-content:center;
+        font-size:21px;border:2px solid #fff;
+        box-shadow:${glow};
+      ">🚌</div>
+      <div style="
+        background:${color};color:#fff;
+        font-size:10px;font-weight:700;font-family:'DM Sans',sans-serif;
+        padding:2px 8px;border-radius:6px;margin-top:3px;
+        white-space:nowrap;
+      ">${name}</div>
+    </div>`,
+    iconSize:[60,58], iconAnchor:[30,29]
+  });
+
+  const popupContent = `
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8;">
+      <b style="font-size:14px;">🚌 ${name}</b><br>
+      Status: <b style="color:${isLive?"#00e676":"#6b7fa3"}">${isLive?"● Live":"● Offline"}</b><br>
+      Lat: ${bus.lat.toFixed(5)}<br>
+      Lng: ${bus.lng.toFixed(5)}<br>
+      Updated: ${timeAgo(bus.updatedAt)}
+    </div>`;
+
+  if(busMarkers[uid]){
+    // ✅ Smooth move — this is the real-time update students see
+    busMarkers[uid].setLatLng([bus.lat, bus.lng]);
+    busMarkers[uid].setIcon(icon);
+    busMarkers[uid].setPopupContent(popupContent);
+  } else {
+    busMarkers[uid] = L.marker([bus.lat, bus.lng], { icon })
+      .addTo(studentMap)
+      .bindPopup(popupContent);
+  }
+
+  // Auto-pan to latest active bus
+  if(isLive) studentMap.panTo([bus.lat, bus.lng], { animate:true, duration:1 });
+}
+
+function renderSidebar(data){
+  const list = document.getElementById("bus-list");
+  const noMsg = document.getElementById("no-buses-msg");
+  // Clear except no-buses placeholder
+  [...list.children].forEach(c => { if(c !== noMsg) c.remove(); });
+
+  Object.entries(data).forEach(([uid, bus]) => {
+    const name   = bus.email ? bus.email.split("@")[0] : "Bus";
+    const isLive = bus.active === true;
+    const div    = document.createElement("div");
+    div.className = "bus-item" + (isLive ? " live" : "");
+    div.onclick = () => {
+      if(bus.lat && bus.lng)
+        studentMap.flyTo([bus.lat, bus.lng], 16, { duration:1.2 });
+    };
+    div.innerHTML = `
+      <div class="bi-top">
+        <span class="bi-name">🚌 ${name}</span>
+        <span class="bi-badge ${isLive?"bi-live":"bi-off"}">${isLive?"● Live":"● Offline"}</span>
+      </div>
+      <div class="bi-sub">Updated: ${timeAgo(bus.updatedAt)}</div>
+      <div class="bi-coords">${bus.lat?.toFixed(4) ?? "—"}, ${bus.lng?.toFixed(4) ?? "—"}</div>`;
+    list.insertBefore(div, noMsg);
+  });
+}
+
+function timeAgo(ts){
+  if(!ts) return "unknown";
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<10)  return "just now";
+  if(s<60)  return s+"s ago";
+  if(s<3600) return Math.floor(s/60)+"m ago";
+  return Math.floor(s/3600)+"h ago";
+}
+
+/* ── HELPERS ── */
+function showScreen(name){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-"+name).classList.add("active");
+  if(name==="student" && studentMap)
+    setTimeout(() => studentMap.invalidateSize(), 150);
+}
+
+window.showToast = function(msg, type=""){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast show "+type;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove("show"), 3500);
+};
+
+/* expose for HTML onclick */
+window.doLogout = window.doLogout;
+window.startTrip = window.startTrip;
+window.stopTrip = window.stopTrip;
+</script>
+</body>
+</html>
