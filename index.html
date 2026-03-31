@@ -161,6 +161,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 }
 .bus-item:hover{border-color:rgba(0,212,255,.3);}
 .bus-item.live{border-left:3px solid var(--green);}
+.bus-item.tracked{border-left:3px solid var(--accent);background:rgba(0,212,255,.04);}
+.bus-item.live.tracked{border-left:3px solid var(--accent);}
 .bi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
 .bi-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
 .bi-badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;}
@@ -175,6 +177,79 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 }
 .no-buses span{font-size:36px;opacity:.3;}
 .no-buses p{font-size:12px;line-height:1.6;}
+
+/* BUS SELECTION SCREEN */
+#screen-busselect{
+  align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 80% 20%,#0d1f3c,var(--bg) 60%);
+  position:relative;overflow-y:auto;
+}
+#screen-busselect::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;opacity:0.2;
+}
+.busselect-wrap{
+  width:100%;max-width:520px;padding:28px 20px;
+  position:relative;z-index:1;
+  animation:fadeUp .45s ease;
+}
+.busselect-header{text-align:center;margin-bottom:28px;}
+.busselect-header .bs-icon{font-size:40px;margin-bottom:10px;}
+.busselect-header h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
+.busselect-header p{color:var(--muted);font-size:13px;}
+.bs-role-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  margin-bottom:14px;
+}
+.bs-role-driver{background:rgba(255,107,53,.12);color:var(--accent2);border:1px solid rgba(255,107,53,.25);}
+.bs-role-student{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.bus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+@media(max-width:400px){.bus-grid{grid-template-columns:repeat(2,1fr);}}
+.bus-btn{
+  background:var(--card);border:2px solid var(--border);border-radius:16px;
+  padding:18px 10px;cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  position:relative;overflow:hidden;
+}
+.bus-btn:hover{border-color:rgba(0,212,255,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.bus-btn.selected{border-color:var(--accent);background:rgba(0,212,255,.07);box-shadow:0 0 0 3px rgba(0,212,255,.15);}
+.bus-btn.has-driver{border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.04);}
+.bus-btn.has-driver.selected{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,118,.2);}
+.bus-number{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:.02em;}
+.bus-route-tag{font-size:10px;color:var(--muted);text-align:center;line-height:1.4;}
+.bus-live-pip{
+  position:absolute;top:8px;right:8px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 6px var(--green);
+  animation:blink 1.5s infinite;
+}
+.bus-offline-pip{
+  position:absolute;top:8px;right:8px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--muted);
+}
+.bs-confirm-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--accent),#0099bb);
+  border:none;border-radius:13px;color:#000;
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+}
+.bs-confirm-btn:disabled{opacity:.4;cursor:not-allowed;}
+.bs-confirm-btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.35);}
+.bs-back{
+  width:100%;padding:11px;margin-top:10px;
+  background:transparent;border:1px solid var(--border);
+  border-radius:13px;color:var(--muted);
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  cursor:pointer;transition:all .2s;
+}
+.bs-back:hover{border-color:var(--muted);}
+.bs-legend{display:flex;gap:16px;justify-content:center;margin-bottom:16px;font-size:11px;color:var(--muted);}
+.bs-legend span{display:flex;align-items:center;gap:5px;}
 
 /* MAP */
 .map-wrap{flex:1;position:relative;}
@@ -274,6 +349,27 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 </div>
 
 <!-- ══════════════ DRIVER ══════════════ -->
+<!-- BUS SELECTION SCREEN -->
+<div id="screen-busselect" class="screen">
+  <div class="busselect-wrap">
+    <div class="busselect-header">
+      <div class="bs-icon">🚌</div>
+      <div id="bs-role-badge" class="bs-role-badge bs-role-driver">🚗 Driver</div>
+      <h2 id="bs-title">Select Your Bus</h2>
+      <p id="bs-subtitle">Choose the bus you are driving today</p>
+    </div>
+    <div class="bs-legend">
+      <span><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 5px var(--green);"></span> Driver online</span>
+      <span><span style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;"></span> Offline</span>
+    </div>
+    <div class="bus-grid" id="bus-grid"></div>
+    <button class="bs-confirm-btn" id="bs-confirm-btn" onclick="confirmBusSelection()" disabled>
+      Continue →
+    </button>
+    <button class="bs-back" onclick="doLogout()">← Back to Login</button>
+  </div>
+</div>
+
 <div id="screen-driver" class="screen">
   <nav class="topnav">
     <div class="nav-l">
@@ -293,8 +389,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     </div>
 
     <div class="bus-card">
-      <div class="bc-lbl">Trip Status</div>
-      <div class="bc-val">Ready to depart</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div class="bc-lbl">Assigned Bus</div>
+        <span id="drv-bus-badge" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent2);letter-spacing:.04em;">—</span>
+      </div>
+      <div class="bc-val" id="drv-bus-route" style="color:var(--muted);font-size:13px;font-weight:400;margin-bottom:10px;">No route assigned</div>
+      <div class="bc-lbl" style="margin-top:4px;">Trip Status</div>
       <div class="chips">
         <div class="chip"><div class="dot" id="trip-dot"></div><span id="trip-txt">Trip Inactive</span></div>
         <div class="chip"><div class="dot" id="gps-dot"></div><span id="gps-txt">GPS Standby</span></div>
@@ -342,7 +442,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <div class="sidebar">
       <div class="sb-head">
         <h2>🚌 Live Buses</h2>
-        <p>Click a bus to locate it on the map</p>
+        <p id="sb-tracking-label">Click a bus to locate it on the map</p>
+        <div id="sb-selected-bus" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;font-size:12px;color:var(--accent);">
+          📍 Tracking: <b id="sb-selected-bus-name">—</b>
+        </div>
       </div>
       <div class="bus-list" id="bus-list">
         <div class="no-buses" id="no-buses-msg">
@@ -395,6 +498,21 @@ let updateCount   = 0;
 let studentMap    = null;
 let busMarkers    = {};
 let authMode      = "signin"; // "signin" | "signup"
+let selectedBusId = null;    // selected bus number id e.g. "BUS-01"
+let busesLiveData = {};      // realtime snapshot of all buses from Firebase
+
+/* ── BUS DEFINITIONS ── */
+const BUS_LIST = [
+  { id:"BUS-01", label:"Bus 01", route:"Main Gate → Block A" },
+  { id:"BUS-02", label:"Bus 02", route:"Hostel → Library" },
+  { id:"BUS-03", label:"Bus 03", route:"Block B → Canteen" },
+  { id:"BUS-04", label:"Bus 04", route:"Sports Ground → Admin" },
+  { id:"BUS-05", label:"Bus 05", route:"Gate 2 → Lab Block" },
+  { id:"BUS-06", label:"Bus 06", route:"Girls Hostel → Block C" },
+  { id:"BUS-07", label:"Bus 07", route:"Parking → Library" },
+  { id:"BUS-08", label:"Bus 08", route:"Workshop → Canteen" },
+  { id:"BUS-09", label:"Bus 09", route:"Main Gate → Boys Hostel" },
+];
 
 /* ── AUTH MODE TOGGLE ── */
 window.toggleAuthMode = () => {
@@ -410,6 +528,78 @@ window.toggleAuthMode = () => {
   document.getElementById("login-pw").placeholder         = isSignup ? "Create password (6+ chars)" : "Enter password";
   document.getElementById("login-pw").autocomplete        = isSignup ? "new-password" : "current-password";
   document.getElementById("login-err").style.display = "none";
+};
+
+/* ── BUS SELECTION SCREEN ── */
+function showBusSelectScreen(){
+  // Set role badge + title
+  const isDriver = currentRole === "driver";
+  const badge = document.getElementById("bs-role-badge");
+  badge.textContent = isDriver ? "🚗 Driver" : "🎓 Student / Faculty";
+  badge.className = "bs-role-badge " + (isDriver ? "bs-role-driver" : "bs-role-student");
+  document.getElementById("bs-title").textContent    = isDriver ? "Select Your Bus" : "Which bus are you tracking?";
+  document.getElementById("bs-subtitle").textContent = isDriver ? "Choose the bus you are driving today" : "Select a bus to follow on the map";
+
+  selectedBusId = null;
+  document.getElementById("bs-confirm-btn").disabled = true;
+  renderBusGrid();
+  showScreen("busselect");
+}
+
+function renderBusGrid(){
+  const grid = document.getElementById("bus-grid");
+  grid.innerHTML = "";
+  BUS_LIST.forEach(bus => {
+    const liveInfo = busesLiveData[bus.id];
+    const isLive   = liveInfo && liveInfo.active === true;
+    const btn = document.createElement("button");
+    btn.className = "bus-btn" + (isLive ? " has-driver" : "");
+    btn.dataset.busId = bus.id;
+    btn.onclick = () => selectBus(bus.id);
+    btn.innerHTML = `
+      <div class="${isLive ? "bus-live-pip" : "bus-offline-pip"}"></div>
+      <span style="font-size:26px;">🚌</span>
+      <span class="bus-number">${bus.label}</span>
+      <span class="bus-route-tag">${bus.route}</span>
+    `;
+    grid.appendChild(btn);
+  });
+}
+
+function selectBus(busId){
+  selectedBusId = busId;
+  document.querySelectorAll(".bus-btn").forEach(b => {
+    b.classList.toggle("selected", b.dataset.busId === busId);
+  });
+  document.getElementById("bs-confirm-btn").disabled = false;
+  const bus = BUS_LIST.find(b => b.id === busId);
+  document.getElementById("bs-confirm-btn").textContent = `Continue with ${bus ? bus.label : busId} →`;
+}
+
+window.confirmBusSelection = () => {
+  if(!selectedBusId) return;
+  if(currentRole === "driver"){
+    const bus = BUS_LIST.find(b => b.id === selectedBusId);
+    document.getElementById("drv-bus-badge").textContent = bus ? bus.label : selectedBusId;
+    document.getElementById("drv-bus-route").textContent = bus ? bus.route : "";
+    document.getElementById("drv-email").textContent = currentUser.email;
+    showScreen("driver");
+  } else {
+    // Student — go to map, highlight the selected bus
+    const bus = BUS_LIST.find(b => b.id === selectedBusId);
+    document.getElementById("sb-selected-bus").style.display = "block";
+    document.getElementById("sb-selected-bus-name").textContent = bus ? `${bus.label} · ${bus.route}` : selectedBusId;
+    showScreen("student");
+    initMap();
+    listenBuses();
+    // After map loads, pan to the selected bus if it's live
+    setTimeout(() => {
+      const liveInfo = busesLiveData[selectedBusId];
+      if(liveInfo && liveInfo.lat && liveInfo.lng){
+        studentMap.flyTo([liveInfo.lat, liveInfo.lng], 16, { duration:1.2 });
+      }
+    }, 600);
+  }
 };
 
 /* ── ROLE SWITCH ── */
@@ -503,20 +693,23 @@ onAuthStateChanged(auth, u => { if(!u) showScreen("login"); });
 
 /* ── LAUNCH ── */
 function launchDashboard(){
-  if(currentRole==="driver"){
-    document.getElementById("drv-email").textContent = currentUser.email;
-    showScreen("driver");
-  } else {
-    showScreen("student");
-    initMap();
-    listenBuses();
-  }
+  // First load buses data so bus grid shows live status, then show selection screen
+  const busesRef = ref(db, "buses");
+  onValue(busesRef, snap => {
+    const data = snap.val() || {};
+    // Index by busId field stored in firebase
+    busesLiveData = {};
+    Object.values(data).forEach(b => { if(b.busId) busesLiveData[b.busId] = b; });
+  });
+  showBusSelectScreen();
 }
 
 /* ── LOGOUT ── */
 window.doLogout = async () => {
   stopTrip();
   await signOut(auth);
+  selectedBusId = null;
+  busesLiveData = {};
   showScreen("login");
   document.getElementById("login-email").value = "";
   document.getElementById("login-pw").value = "";
@@ -543,9 +736,13 @@ window.startTrip = () => {
       const { latitude:lat, longitude:lng, accuracy } = pos.coords;
 
       // ✅ Write real GPS to Firebase — students see this instantly
+      const busInfo = BUS_LIST.find(b => b.id === selectedBusId) || {};
       set(ref(db, `buses/${currentUser.uid}`), {
         uid: currentUser.uid,
         email: currentUser.email,
+        busId: selectedBusId || "UNKNOWN",
+        busLabel: busInfo.label || selectedBusId || "Bus",
+        busRoute: busInfo.route || "",
         lat, lng,
         accuracy: Math.round(accuracy),
         active: true,
@@ -575,8 +772,16 @@ window.stopTrip = () => {
   if(gpsWatchId!==null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId=null; }
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   if(currentUser){
-    set(ref(db, `buses/${currentUser.uid}/active`), false);
-    set(ref(db, `buses/${currentUser.uid}/updatedAt`), Date.now());
+    set(ref(db, `buses/${currentUser.uid}`), {
+      uid: currentUser.uid,
+      email: currentUser.email,
+      busId: selectedBusId || "UNKNOWN",
+      busLabel: (BUS_LIST.find(b=>b.id===selectedBusId)||{}).label || selectedBusId || "Bus",
+      busRoute: (BUS_LIST.find(b=>b.id===selectedBusId)||{}).route || "",
+      lat: null, lng: null,
+      active: false,
+      updatedAt: Date.now()
+    });
   }
   setDriverUI(false);
   ["coord-lat","coord-lng","coord-acc"].forEach(id => {
@@ -624,8 +829,11 @@ function listenBuses(){
     const list = document.getElementById("bus-list");
     const noMsg = document.getElementById("no-buses-msg");
 
+    // Keep busesLiveData in sync (used by bus selection grid)
+    busesLiveData = {};
+    if(data) Object.values(data).forEach(b => { if(b.busId) busesLiveData[b.busId] = b; });
+
     if(!data){
-      // Remove all markers
       Object.values(busMarkers).forEach(m => studentMap.removeLayer(m));
       busMarkers = {};
       list.innerHTML = "";
@@ -649,34 +857,43 @@ function listenBuses(){
 
 function placeBus(uid, bus){
   if(!bus.lat || !bus.lng) return;
-  const name    = bus.email ? bus.email.split("@")[0] : "Bus";
+  // Use busLabel from Firebase if available, fall back to bus number or email
+  const name    = bus.busLabel || bus.busId || (bus.email ? bus.email.split("@")[0] : "Bus");
+  const route   = bus.busRoute || "";
   const isLive  = bus.active === true;
-  const color   = isLive ? "#ff6b35" : "#6b7fa3";
-  const glow    = isLive ? "0 0 0 6px rgba(255,107,53,.25),0 0 20px rgba(255,107,53,.4)" : "none";
+  const isSelected = bus.busId && bus.busId === selectedBusId;
+  const color   = isLive ? (isSelected ? "#00d4ff" : "#ff6b35") : "#6b7fa3";
+  const glow    = isLive
+    ? (isSelected
+        ? "0 0 0 6px rgba(0,212,255,.3),0 0 24px rgba(0,212,255,.5)"
+        : "0 0 0 6px rgba(255,107,53,.25),0 0 20px rgba(255,107,53,.4)")
+    : "none";
 
   const icon = L.divIcon({
     className:"",
     html:`<div style="display:flex;flex-direction:column;align-items:center;">
       <div style="
-        width:42px;height:42px;border-radius:50%;
+        width:44px;height:44px;border-radius:50%;
         background:${color};
         display:flex;align-items:center;justify-content:center;
-        font-size:21px;border:2px solid #fff;
+        font-size:22px;border:2px solid #fff;
         box-shadow:${glow};
+        transition:all .3s;
       ">🚌</div>
       <div style="
         background:${color};color:#fff;
-        font-size:10px;font-weight:700;font-family:'DM Sans',sans-serif;
-        padding:2px 8px;border-radius:6px;margin-top:3px;
+        font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;
+        padding:3px 9px;border-radius:6px;margin-top:3px;
         white-space:nowrap;
       ">${name}</div>
     </div>`,
-    iconSize:[60,58], iconAnchor:[30,29]
+    iconSize:[64,60], iconAnchor:[32,30]
   });
 
   const popupContent = `
-    <div style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8;">
-      <b style="font-size:14px;">🚌 ${name}</b><br>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.9;">
+      <b style="font-size:15px;">🚌 ${name}</b><br>
+      ${route ? `<span style="color:#6b7fa3;font-size:11px;">📍 ${route}</span><br>` : ""}
       Status: <b style="color:${isLive?"#00e676":"#6b7fa3"}">${isLive?"● Live":"● Offline"}</b><br>
       Lat: ${bus.lat.toFixed(5)}<br>
       Lng: ${bus.lng.toFixed(5)}<br>
@@ -684,7 +901,6 @@ function placeBus(uid, bus){
     </div>`;
 
   if(busMarkers[uid]){
-    // ✅ Smooth move — this is the real-time update students see
     busMarkers[uid].setLatLng([bus.lat, bus.lng]);
     busMarkers[uid].setIcon(icon);
     busMarkers[uid].setPopupContent(popupContent);
@@ -694,30 +910,44 @@ function placeBus(uid, bus){
       .bindPopup(popupContent);
   }
 
-  // Auto-pan to latest active bus
-  if(isLive) studentMap.panTo([bus.lat, bus.lng], { animate:true, duration:1 });
+  // Auto-pan: always pan to the student's selected bus if it's live
+  if(isLive && isSelected){
+    studentMap.panTo([bus.lat, bus.lng], { animate:true, duration:1 });
+  } else if(isLive && !selectedBusId){
+    studentMap.panTo([bus.lat, bus.lng], { animate:true, duration:1 });
+  }
 }
 
 function renderSidebar(data){
-  const list = document.getElementById("bus-list");
+  const list  = document.getElementById("bus-list");
   const noMsg = document.getElementById("no-buses-msg");
-  // Clear except no-buses placeholder
   [...list.children].forEach(c => { if(c !== noMsg) c.remove(); });
 
-  Object.entries(data).forEach(([uid, bus]) => {
-    const name   = bus.email ? bus.email.split("@")[0] : "Bus";
-    const isLive = bus.active === true;
-    const div    = document.createElement("div");
-    div.className = "bus-item" + (isLive ? " live" : "");
-    div.onclick = () => {
-      if(bus.lat && bus.lng)
-        studentMap.flyTo([bus.lat, bus.lng], 16, { duration:1.2 });
+  // Sort: selected bus first, then live buses, then offline
+  const entries = Object.entries(data).sort(([,a],[,b]) => {
+    const aSelected = a.busId === selectedBusId ? 1 : 0;
+    const bSelected = b.busId === selectedBusId ? 1 : 0;
+    if(bSelected !== aSelected) return bSelected - aSelected;
+    return (b.active===true ? 1:0) - (a.active===true ? 1:0);
+  });
+
+  entries.forEach(([uid, bus]) => {
+    const name    = bus.busLabel || bus.busId || (bus.email ? bus.email.split("@")[0] : "Bus");
+    const route   = bus.busRoute || "";
+    const isLive  = bus.active === true;
+    const isTracked = bus.busId && bus.busId === selectedBusId;
+    const div     = document.createElement("div");
+    div.className = "bus-item" + (isLive ? " live" : "") + (isTracked ? " tracked" : "");
+    div.onclick   = () => {
+      if(bus.lat && bus.lng) studentMap.flyTo([bus.lat, bus.lng], 16, { duration:1.2 });
     };
     div.innerHTML = `
       <div class="bi-top">
         <span class="bi-name">🚌 ${name}</span>
         <span class="bi-badge ${isLive?"bi-live":"bi-off"}">${isLive?"● Live":"● Offline"}</span>
       </div>
+      ${isTracked ? '<div style="font-size:10px;color:var(--accent);margin-bottom:3px;">📍 Your tracked bus</div>' : ""}
+      ${route ? `<div class="bi-sub">🗺 ${route}</div>` : ""}
       <div class="bi-sub">Updated: ${timeAgo(bus.updatedAt)}</div>
       <div class="bi-coords">${bus.lat?.toFixed(4) ?? "—"}, ${bus.lng?.toFixed(4) ?? "—"}</div>`;
     list.insertBefore(div, noMsg);
