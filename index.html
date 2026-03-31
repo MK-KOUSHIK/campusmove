@@ -4,17 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CampusMove — Live Bus Tracker</title>
-
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
-
 <style>
 :root{
   --bg:#0a0e1a;--surface:#111827;--surface2:#1a2235;--border:#1e2d45;
   --accent:#00d4ff;--accent2:#ff6b35;--green:#00e676;--red:#ff4757;
+  --yellow:#ffcc00;--purple:#a855f7;
   --text:#e8edf5;--muted:#6b7fa3;--card:#141d2e;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -23,11 +20,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .screen{display:none;height:100vh;flex-direction:column;}
 .screen.active{display:flex;}
 
-/* LOGIN */
+/* ── LOGIN ── */
 #screen-login{
   align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 20% 50%,#0d1f3c,var(--bg) 60%);
-  position:relative;
+  position:relative;overflow-y:auto;
 }
 #screen-login::before{
   content:'';position:absolute;inset:0;pointer-events:none;
@@ -43,19 +40,19 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   animation:fadeUp .5s ease;
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:30px;}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
 .brand-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#0088cc);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
 .brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;background:linear-gradient(135deg,var(--accent),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .brand-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
 .login-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px;}
-.login-sub{color:var(--muted);font-size:14px;margin-bottom:24px;}
-.role-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:20px;gap:4px;}
+.login-sub{color:var(--muted);font-size:14px;margin-bottom:20px;}
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:12px;padding:4px;margin-bottom:18px;gap:4px;}
 .role-tab{padding:10px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;background:transparent;color:var(--muted);transition:all .2s;}
 .role-tab.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
 .fw{position:relative;}
-.fw span{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
+.fw span.ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
 .fw input{
   width:100%;padding:12px 13px 12px 40px;
   background:var(--surface);border:1px solid var(--border);
@@ -65,23 +62,22 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 }
 .fw input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1);}
 .fw input::placeholder{color:var(--muted);}
-.err-msg{
-  background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);
-  border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);
-  margin-bottom:12px;display:none;
-}
-.btn-login{
+.err-msg{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:12px;display:none;}
+.btn-primary{
   width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#0099bb);
   border:none;border-radius:12px;color:#000;
   font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
   cursor:pointer;transition:all .2s;margin-top:4px;
 }
-.btn-login:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.3);}
-.btn-login:disabled{opacity:.6;cursor:not-allowed;}
-.hint{text-align:center;margin-top:16px;font-size:12px;color:var(--muted);line-height:2;}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.3);}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+.hint{text-align:center;margin-top:14px;font-size:12px;color:var(--muted);line-height:2;}
 .hint b{color:var(--accent);}
+.admin-link{text-align:center;margin-top:10px;font-size:12px;}
+.admin-link a{color:var(--purple);text-decoration:none;font-size:12px;}
+.admin-link a:hover{text-decoration:underline;}
 
-/* TOPNAV */
+/* ── TOPNAV ── */
 .topnav{
   background:var(--surface);border-bottom:1px solid var(--border);
   height:58px;padding:0 20px;
@@ -90,14 +86,15 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .nav-l{display:flex;align-items:center;gap:10px;}
 .nav-ico{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),#0088cc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
 .nav-t{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;}
-.nav-r{display:flex;align-items:center;gap:10px;}
+.nav-r{display:flex;align-items:center;gap:8px;}
 .badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
 .badge-d{background:rgba(255,107,53,.12);color:var(--accent2);border:1px solid rgba(255,107,53,.25);}
 .badge-s{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+.badge-a{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.25);}
 .btn-out{padding:6px 14px;border-radius:8px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;}
 .btn-out:hover{border-color:var(--red);color:var(--red);}
 
-/* DRIVER BODY */
+/* ── DRIVER BODY ── */
 #screen-driver .body{flex:1;overflow-y:auto;padding:24px 18px;max-width:540px;margin:0 auto;width:100%;}
 .drv-head{margin-bottom:20px;}
 .drv-head h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
@@ -113,20 +110,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .dot.gps{background:var(--accent);box-shadow:0 0 6px var(--accent);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .ctrls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-.btn-start{
-  padding:18px;border-radius:15px;border:none;cursor:pointer;
-  background:linear-gradient(135deg,var(--green),#00b050);
-  color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
-  display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .25s;
-}
+.btn-start{padding:18px;border-radius:15px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--green),#00b050);color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .25s;}
 .btn-start:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,230,118,.35);}
 .btn-start:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-.btn-stop{
-  padding:18px;border-radius:15px;cursor:pointer;
-  background:var(--surface2);border:2px solid var(--border);
-  color:var(--muted);font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
-  display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .25s;
-}
+.btn-stop{padding:18px;border-radius:15px;cursor:pointer;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-family:'Syne',sans-serif;font-size:15px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .25s;}
 .btn-stop:hover:not(:disabled){border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08);}
 .btn-stop:disabled{opacity:.3;cursor:not-allowed;}
 .btn-ico{font-size:26px;}
@@ -141,24 +128,26 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .timer-lbl{font-size:11px;color:var(--muted);margin-bottom:3px;}
 .timer{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:.04em;}
 
-/* STUDENT LAYOUT */
+/* ── STUDENT LAYOUT ── */
 #screen-student .body{flex:1;display:flex;overflow:hidden;}
-.sidebar{
-  width:290px;flex-shrink:0;
-  background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.sb-head{padding:16px;border-bottom:1px solid var(--border);}
+.sidebar{width:290px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sb-head{padding:14px 16px;border-bottom:1px solid var(--border);}
 .sb-head h2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:2px;}
 .sb-head p{font-size:12px;color:var(--muted);}
+.sb-tracked{margin-top:8px;padding:7px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;font-size:12px;color:var(--accent);display:none;}
+.sb-tracked b{font-weight:700;}
+/* ETA bar inside sidebar */
+.eta-bar{padding:10px 12px;background:var(--card);border-bottom:1px solid var(--border);display:none;}
+.eta-bar-inner{display:flex;justify-content:space-between;align-items:center;}
+.eta-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.eta-value{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--yellow);}
+.eta-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.eta-pickup-btn{font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.eta-pickup-btn:hover{background:rgba(0,212,255,.1);}
 .bus-list{flex:1;overflow-y:auto;padding:10px;}
 .bus-list::-webkit-scrollbar{width:3px;}
 .bus-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-.bus-item{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:12px;padding:13px;margin-bottom:8px;
-  cursor:pointer;transition:all .2s;
-}
+.bus-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
 .bus-item:hover{border-color:rgba(0,212,255,.3);}
 .bus-item.live{border-left:3px solid var(--green);}
 .bus-item.tracked{border-left:3px solid var(--accent);background:rgba(0,212,255,.04);}
@@ -170,96 +159,99 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .bi-off{background:rgba(107,127,163,.15);color:var(--muted);}
 .bi-sub{font-size:11px;color:var(--muted);margin-bottom:3px;}
 .bi-coords{font-size:11px;color:var(--muted);font-family:monospace;}
-.no-buses{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:10px;color:var(--muted);
-  padding:24px;text-align:center;
-}
+.no-buses{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);padding:24px;text-align:center;}
 .no-buses span{font-size:36px;opacity:.3;}
 .no-buses p{font-size:12px;line-height:1.6;}
 
-/* BUS SELECTION SCREEN */
+/* ── BUS SELECTION ── */
 #screen-busselect{
   align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 80% 20%,#0d1f3c,var(--bg) 60%);
   position:relative;overflow-y:auto;
 }
-#screen-busselect::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(var(--border) 1px,transparent 1px),
-                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:40px 40px;opacity:0.2;
-}
-.busselect-wrap{
-  width:100%;max-width:520px;padding:28px 20px;
-  position:relative;z-index:1;
-  animation:fadeUp .45s ease;
-}
-.busselect-header{text-align:center;margin-bottom:28px;}
+#screen-busselect::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;}
+.busselect-wrap{width:100%;max-width:520px;padding:28px 20px;position:relative;z-index:1;animation:fadeUp .45s ease;}
+.busselect-header{text-align:center;margin-bottom:24px;}
 .busselect-header .bs-icon{font-size:40px;margin-bottom:10px;}
 .busselect-header h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
 .busselect-header p{color:var(--muted);font-size:13px;}
-.bs-role-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;
-  margin-bottom:14px;
-}
+.bs-role-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:14px;}
 .bs-role-driver{background:rgba(255,107,53,.12);color:var(--accent2);border:1px solid rgba(255,107,53,.25);}
 .bs-role-student{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
 .bus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
 @media(max-width:400px){.bus-grid{grid-template-columns:repeat(2,1fr);}}
-.bus-btn{
-  background:var(--card);border:2px solid var(--border);border-radius:16px;
-  padding:18px 10px;cursor:pointer;transition:all .2s;
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  position:relative;overflow:hidden;
-}
+.bus-btn{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:18px 10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;overflow:hidden;}
 .bus-btn:hover{border-color:rgba(0,212,255,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
 .bus-btn.selected{border-color:var(--accent);background:rgba(0,212,255,.07);box-shadow:0 0 0 3px rgba(0,212,255,.15);}
 .bus-btn.has-driver{border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.04);}
 .bus-btn.has-driver.selected{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,118,.2);}
 .bus-number{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:.02em;}
-.bus-route-tag{font-size:10px;color:var(--muted);text-align:center;line-height:1.4;}
-.bus-live-pip{
-  position:absolute;top:8px;right:8px;
-  width:8px;height:8px;border-radius:50%;
-  background:var(--green);box-shadow:0 0 6px var(--green);
-  animation:blink 1.5s infinite;
-}
-.bus-offline-pip{
-  position:absolute;top:8px;right:8px;
-  width:8px;height:8px;border-radius:50%;
-  background:var(--muted);
-}
-.bs-confirm-btn{
-  width:100%;padding:14px;
-  background:linear-gradient(135deg,var(--accent),#0099bb);
-  border:none;border-radius:13px;color:#000;
-  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
-  cursor:pointer;transition:all .2s;
-}
+.bus-live-pip{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 1.5s infinite;}
+.bus-offline-pip{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--muted);}
+.bs-confirm-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#0099bb);border:none;border-radius:13px;color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
 .bs-confirm-btn:disabled{opacity:.4;cursor:not-allowed;}
 .bs-confirm-btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.35);}
-.bs-back{
-  width:100%;padding:11px;margin-top:10px;
-  background:transparent;border:1px solid var(--border);
-  border-radius:13px;color:var(--muted);
-  font-family:'DM Sans',sans-serif;font-size:14px;
-  cursor:pointer;transition:all .2s;
-}
+.bs-back{width:100%;padding:11px;margin-top:10px;background:transparent;border:1px solid var(--border);border-radius:13px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;}
 .bs-back:hover{border-color:var(--muted);}
 .bs-legend{display:flex;gap:16px;justify-content:center;margin-bottom:16px;font-size:11px;color:var(--muted);}
 .bs-legend span{display:flex;align-items:center;gap:5px;}
 
-/* MAP */
+/* ── MAP ── */
 .map-wrap{flex:1;position:relative;}
 #leaflet-map{width:100%;height:100%;}
 .leaflet-tile{filter:brightness(.65) saturate(.7) hue-rotate(195deg);}
 .leaflet-container{background:#0a0e1a;}
 .leaflet-popup-content-wrapper{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);}
 .leaflet-popup-tip{background:var(--card);}
+/* Pickup pin hint */
+.map-pickup-hint{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.5);
+  color:var(--yellow);padding:8px 16px;border-radius:10px;font-size:13px;
+  z-index:999;pointer-events:none;white-space:nowrap;
+  animation:fadeUp .3s ease;
+}
 
-/* TOAST */
+/* ── ADMIN PANEL ── */
+#screen-admin .body{flex:1;overflow-y:auto;padding:20px;}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;}
+.stat-card h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+.stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;}
+.stat-num.green{color:var(--green);}
+.stat-num.accent{color:var(--accent);}
+.stat-num.yellow{color:var(--yellow);}
+.admin-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:16px;}
+.admin-table-head{padding:14px 18px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+.admin-table{width:100%;border-collapse:collapse;}
+.admin-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:10px 18px;text-align:left;border-bottom:1px solid var(--border);}
+.admin-table td{padding:11px 18px;font-size:13px;border-bottom:1px solid rgba(30,45,69,.5);}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tr:hover td{background:rgba(255,255,255,.02);}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;}
+.pill-green{background:rgba(0,230,118,.12);color:var(--green);}
+.pill-muted{background:rgba(107,127,163,.15);color:var(--muted);}
+.pill-yellow{background:rgba(255,204,0,.12);color:var(--yellow);}
+.admin-section-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin:20px 0 12px;}
+.btn-admin-action{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;}
+.btn-admin-action:hover{border-color:var(--accent);color:var(--accent);}
+.admin-login-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:44px 40px;width:100%;max-width:400px;position:relative;z-index:1;box-shadow:0 32px 80px rgba(0,0,0,.5);animation:fadeUp .5s ease;}
+
+/* ── PUSH NOTIFICATION BANNER ── */
+.notif-banner{
+  position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);
+  background:var(--card);border:1px solid var(--accent);
+  padding:12px 20px;border-radius:14px;font-size:13px;
+  box-shadow:0 12px 32px rgba(0,0,0,.5);
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+  z-index:9998;white-space:nowrap;pointer-events:none;
+  opacity:0;
+}
+.notif-banner.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.notif-banner.near{border-color:var(--yellow);color:var(--yellow);}
+.notif-banner.arrived{border-color:var(--green);color:var(--green);}
+
+/* ── TOAST ── */
 .toast{
   position:fixed;bottom:24px;left:50%;
   transform:translateX(-50%) translateY(70px);
@@ -274,16 +266,17 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .toast.error{border-color:rgba(255,71,87,.4);color:var(--red);}
 
 @media(max-width:640px){
-  .login-card{margin:16px;padding:30px 22px;}
-  .sidebar{width:100%;max-height:220px;border-right:none;border-bottom:1px solid var(--border);}
+  .login-card,.admin-login-card{margin:16px;padding:30px 22px;}
+  .sidebar{width:100%;max-height:240px;border-right:none;border-bottom:1px solid var(--border);}
   #screen-student .body{flex-direction:column;}
   .map-wrap{flex:1;min-height:320px;}
+  .admin-grid{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════════ LOGIN ══════════════ -->
+<!-- ══════ LOGIN ══════ -->
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="brand">
@@ -296,60 +289,88 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     <div class="login-title" id="auth-title">Welcome back</div>
     <div class="login-sub" id="auth-sub">Sign in to access your dashboard</div>
 
-    <!-- Warning shown when opened as local file -->
     <div id="local-file-warning" style="display:none;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.4);border-radius:10px;padding:12px 14px;font-size:13px;color:#ffaa00;margin-bottom:14px;line-height:1.6;">
-      ⚠️ <b>Hosting required:</b> Firebase Auth won't work when this file is opened directly from your phone. You need to host it on a server.<br>
-      <span style="color:var(--muted);font-size:12px;">→ Upload to GitHub Pages, Firebase Hosting, or Netlify — it's free and takes 2 minutes.</span>
+      ⚠️ <b>Hosting required:</b> Firebase Auth won't work when opened as a local file. Host on GitHub Pages, Firebase Hosting, or Netlify.
     </div>
 
     <div class="role-tabs">
       <button class="role-tab active" onclick="switchRole('driver')">🚗 Driver</button>
-      <button class="role-tab"        onclick="switchRole('student')">🎓 Student / Faculty</button>
+      <button class="role-tab" onclick="switchRole('student')">🎓 Student / Faculty</button>
     </div>
 
     <div id="login-err" class="err-msg"></div>
 
     <div class="field">
       <label id="uid-label">Driver Email</label>
-      <div class="fw"><span>✉️</span>
+      <div class="fw"><span class="ico">✉️</span>
         <input id="login-email" type="email" placeholder="you@college.edu"
                autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false"/>
       </div>
     </div>
     <div class="field">
       <label>Password</label>
-      <div class="fw"><span>🔒</span>
-        <input id="login-pw" type="password" placeholder="Enter password"
-               autocomplete="current-password"/>
+      <div class="fw"><span class="ico">🔒</span>
+        <input id="login-pw" type="password" placeholder="Enter password" autocomplete="current-password"/>
       </div>
     </div>
 
-    <button class="btn-login" id="btn-login" onclick="doLogin()">Sign In →</button>
+    <button class="btn-primary" id="btn-login" onclick="doLogin()">Sign In →</button>
 
-    <!-- Confirm password for signup (hidden by default) -->
     <div class="field" id="field-confirm" style="display:none;margin-top:14px;">
       <label>Confirm Password</label>
-      <div class="fw"><span>🔒</span>
-        <input id="login-pw2" type="password" placeholder="Repeat password"
-               autocomplete="new-password"/>
+      <div class="fw"><span class="ico">🔒</span>
+        <input id="login-pw2" type="password" placeholder="Repeat password" autocomplete="new-password"/>
       </div>
     </div>
 
-    <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted);">
+    <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted);">
       <span id="auth-toggle-text">Don't have an account?</span>
       <button id="auth-toggle-btn" onclick="toggleAuthMode()"
         style="background:none;border:none;color:var(--accent);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;margin-left:4px;text-decoration:underline;">Sign Up</button>
     </div>
 
-    <div class="hint">
-      Drivers: use a college email &amp; sign up as <b>Driver</b>.<br>
-      Students/Faculty: sign up as <b>Student / Faculty</b>.
+    <div class="admin-link">
+      <a href="#" onclick="showScreen('admin-login');return false;">🔧 Admin Panel →</a>
     </div>
   </div>
 </div>
 
-<!-- ══════════════ DRIVER ══════════════ -->
-<!-- BUS SELECTION SCREEN -->
+<!-- ══════ ADMIN LOGIN ══════ -->
+<div id="screen-admin-login" class="screen" style="align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#1a0a2e,var(--bg) 60%);position:relative;">
+  <div style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;"></div>
+  <div class="admin-login-card">
+    <div class="brand">
+      <div class="brand-icon" style="background:linear-gradient(135deg,var(--purple),#7c3aed);">🔧</div>
+      <div>
+        <div class="brand-name" style="background:linear-gradient(135deg,var(--purple),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Admin Panel</div>
+        <div class="brand-sub">CampusMove Management</div>
+      </div>
+    </div>
+    <div class="login-title">Admin Sign In</div>
+    <div class="login-sub" style="margin-bottom:20px;">Restricted access — admins only</div>
+    <div id="admin-login-err" class="err-msg"></div>
+    <div class="field">
+      <label>Admin Email</label>
+      <div class="fw"><span class="ico">✉️</span>
+        <input id="admin-email" type="email" placeholder="admin@college.edu"
+               autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="fw"><span class="ico">🔒</span>
+        <input id="admin-pw" type="password" placeholder="Admin password" autocomplete="current-password"/>
+      </div>
+    </div>
+    <button class="btn-primary" id="btn-admin-login" onclick="doAdminLogin()"
+      style="background:linear-gradient(135deg,var(--purple),#7c3aed);">Sign In as Admin →</button>
+    <div style="text-align:center;margin-top:14px;font-size:13px;">
+      <button onclick="showScreen('login')" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;">← Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ BUS SELECTION ══════ -->
 <div id="screen-busselect" class="screen">
   <div class="busselect-wrap">
     <div class="busselect-header">
@@ -363,13 +384,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <span><span style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;"></span> Offline</span>
     </div>
     <div class="bus-grid" id="bus-grid"></div>
-    <button class="bs-confirm-btn" id="bs-confirm-btn" onclick="confirmBusSelection()" disabled>
-      Continue →
-    </button>
+    <button class="bs-confirm-btn" id="bs-confirm-btn" onclick="confirmBusSelection()" disabled>Continue →</button>
     <button class="bs-back" onclick="doLogout()">← Back to Login</button>
   </div>
 </div>
 
+<!-- ══════ DRIVER ══════ -->
 <div id="screen-driver" class="screen">
   <nav class="topnav">
     <div class="nav-l">
@@ -378,7 +398,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
     </div>
     <div class="nav-r">
       <div class="badge badge-d">🚗 Driver</div>
-      <span style="font-size:12px;color:var(--muted)" id="drv-email"></span>
+      <span style="font-size:11px;color:var(--muted)" id="drv-email"></span>
       <button class="btn-out" onclick="doLogout()">Logout</button>
     </div>
   </nav>
@@ -387,35 +407,27 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <h1>Driver Dashboard</h1>
       <p>Your GPS will be broadcast live to students when trip is active.</p>
     </div>
-
     <div class="bus-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div class="bc-lbl">Assigned Bus</div>
         <span id="drv-bus-badge" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent2);letter-spacing:.04em;">—</span>
       </div>
-      <div class="bc-val" id="drv-bus-route" style="color:var(--muted);font-size:13px;font-weight:400;margin-bottom:10px;">No route assigned</div>
       <div class="bc-lbl" style="margin-top:4px;">Trip Status</div>
-      <div class="chips">
+      <div class="chips" style="margin-top:6px;">
         <div class="chip"><div class="dot" id="trip-dot"></div><span id="trip-txt">Trip Inactive</span></div>
         <div class="chip"><div class="dot" id="gps-dot"></div><span id="gps-txt">GPS Standby</span></div>
       </div>
     </div>
-
     <div class="ctrls">
-      <button class="btn-start" id="btn-start" onclick="startTrip()">
-        <span class="btn-ico">▶️</span>Start Trip
-      </button>
-      <button class="btn-stop" id="btn-stop" onclick="stopTrip()" disabled>
-        <span class="btn-ico">⏹</span>Stop Trip
-      </button>
+      <button class="btn-start" id="btn-start" onclick="startTrip()"><span class="btn-ico">▶️</span>Start Trip</button>
+      <button class="btn-stop" id="btn-stop" onclick="stopTrip()" disabled><span class="btn-ico">⏹</span>Stop Trip</button>
     </div>
-
     <div class="gps-card">
       <div class="gc-title">📡 Live GPS Feed → Firebase</div>
       <div class="cg">
-        <div class="ci"><div class="ci-lbl">Latitude</div> <div class="ci-val dim" id="coord-lat">—</div></div>
+        <div class="ci"><div class="ci-lbl">Latitude</div><div class="ci-val dim" id="coord-lat">—</div></div>
         <div class="ci"><div class="ci-lbl">Longitude</div><div class="ci-val dim" id="coord-lng">—</div></div>
-        <div class="ci"><div class="ci-lbl">Accuracy</div> <div class="ci-val dim" id="coord-acc">—</div></div>
+        <div class="ci"><div class="ci-lbl">Accuracy</div><div class="ci-val dim" id="coord-acc">—</div></div>
         <div class="ci"><div class="ci-lbl">Updates sent</div><div class="ci-val dim" id="coord-updates">0</div></div>
       </div>
       <div class="timer-wrap">
@@ -426,7 +438,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   </div>
 </div>
 
-<!-- ══════════════ STUDENT ══════════════ -->
+<!-- ══════ STUDENT ══════ -->
 <div id="screen-student" class="screen">
   <nav class="topnav">
     <div class="nav-l">
@@ -441,38 +453,104 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
   <div class="body">
     <div class="sidebar">
       <div class="sb-head">
-        <h2>🚌 Live Buses</h2>
-        <p id="sb-tracking-label">Click a bus to locate it on the map</p>
-        <div id="sb-selected-bus" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:8px;font-size:12px;color:var(--accent);">
+        <h2>🚌 My Bus</h2>
+        <p id="sb-tracking-label">Tracking your selected bus</p>
+        <div class="sb-tracked" id="sb-selected-bus">
           📍 Tracking: <b id="sb-selected-bus-name">—</b>
+        </div>
+      </div>
+      <!-- ETA bar -->
+      <div class="eta-bar" id="eta-bar">
+        <div class="eta-bar-inner">
+          <div>
+            <div class="eta-label">ETA to your stop</div>
+            <div class="eta-value" id="eta-value">—</div>
+            <div class="eta-sub" id="eta-sub">Set a pickup point on the map</div>
+          </div>
+          <button class="eta-pickup-btn" id="eta-pickup-btn" onclick="togglePickupMode()">📍 Set Stop</button>
         </div>
       </div>
       <div class="bus-list" id="bus-list">
         <div class="no-buses" id="no-buses-msg">
           <span>🚌</span>
-          <p>No active buses right now.<br>Waiting for drivers to start trips…</p>
+          <p>Your bus isn't live yet.<br>Waiting for driver to start trip…</p>
         </div>
       </div>
     </div>
-    <div class="map-wrap">
+    <div class="map-wrap" style="position:relative;">
       <div id="leaflet-map"></div>
+      <div class="map-pickup-hint" id="pickup-hint" style="display:none;">📍 Tap on the map to set your pickup point</div>
     </div>
   </div>
 </div>
 
+<!-- ══════ ADMIN PANEL ══════ -->
+<div id="screen-admin" class="screen">
+  <nav class="topnav">
+    <div class="nav-l">
+      <div class="nav-ico" style="background:linear-gradient(135deg,var(--purple),#7c3aed);">🔧</div>
+      <div class="nav-t">Admin Panel</div>
+    </div>
+    <div class="nav-r">
+      <div class="badge badge-a">👑 Admin</div>
+      <button class="btn-out" onclick="doAdminLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="body">
+    <div class="admin-grid" id="admin-stats">
+      <div class="stat-card"><h3>Active Buses</h3><div class="stat-num green" id="stat-active">0</div></div>
+      <div class="stat-card"><h3>Total Buses Registered</h3><div class="stat-num accent" id="stat-total">0</div></div>
+      <div class="stat-card"><h3>Registered Users</h3><div class="stat-num yellow" id="stat-users">—</div></div>
+    </div>
+
+    <div class="admin-section-title">🚌 Live Bus Status</div>
+    <div class="admin-table-wrap">
+      <div class="admin-table-head">
+        <span>All Buses</span>
+        <span style="font-size:11px;color:var(--muted);font-weight:400;">Auto-refreshes live</span>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Bus</th>
+            <th>Driver Email</th>
+            <th>Status</th>
+            <th>Last Update</th>
+            <th>Coordinates</th>
+          </tr>
+        </thead>
+        <tbody id="admin-bus-tbody">
+          <tr><td colspan="5" style="color:var(--muted);font-size:12px;text-align:center;padding:20px;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-section-title">📋 All Registered Buses</div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Bus ID</th><th>Label</th><th>Route</th><th>Status</th></tr>
+        </thead>
+        <tbody id="admin-buslist-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Push notification banner -->
+<div class="notif-banner" id="notif-banner"></div>
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ══════════════ FIREBASE + APP LOGIC ══════════════ -->
+<!-- ══════ FIREBASE + APP LOGIC ══════ -->
 <script type="module">
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set, onValue }
+import { getDatabase, ref, set, get, onValue }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-/* ── YOUR FIREBASE CONFIG ── */
 const firebaseConfig = {
   apiKey: "AIzaSyCM3QrnBjQo_VzryDeLd1V5NFAK5sYnXfM",
   authDomain: "campusmove-252d9.firebaseapp.com",
@@ -488,156 +566,92 @@ const auth        = getAuth(firebaseApp);
 const db          = getDatabase(firebaseApp);
 
 /* ── STATE ── */
-let currentUser   = null;
-let currentRole   = "driver";
-let gpsWatchId    = null;
-let tripActive    = false;
-let timerInterval = null;
-let tripStart     = null;
-let updateCount   = 0;
-let studentMap    = null;
-let busMarkers    = {};
-let authMode      = "signin"; // "signin" | "signup"
-let selectedBusId = null;    // selected bus number id e.g. "BUS-01"
-let busesLiveData = {};      // realtime snapshot of all buses from Firebase
+let currentUser    = null;
+let currentRole    = "driver";
+let adminUser      = null;
+let gpsWatchId     = null;
+let tripActive     = false;
+let timerInterval  = null;
+let tripStart      = null;
+let updateCount    = 0;
+let studentMap     = null;
+let busMarkers     = {};
+let routePolyline  = null;   // Leaflet polyline for selected bus route
+let pickupMarker   = null;   // Student's pickup pin on map
+let pickupMode     = false;  // Is student placing a pickup pin?
+let pickupLatLng   = null;   // {lat, lng} of placed pickup
+let authMode       = "signin";
+let selectedBusId  = null;
+let busesLiveData  = {};
+let etaInterval    = null;
+let lastNotifDist  = Infinity; // track notifications
 
-/* ── BUS DEFINITIONS ── */
+/* ── BUS DEFINITIONS — each bus has a routeCoords array for the polyline ── */
+/* Replace these lat/lng arrays with your actual campus coordinates */
 const BUS_LIST = [
-  { id:"BUS-01", label:"Bus 01", route:"Main Gate → Block A" },
-  { id:"BUS-02", label:"Bus 02", route:"Hostel → Library" },
-  { id:"BUS-03", label:"Bus 03", route:"Block B → Canteen" },
-  { id:"BUS-04", label:"Bus 04", route:"Sports Ground → Admin" },
-  { id:"BUS-05", label:"Bus 05", route:"Gate 2 → Lab Block" },
-  { id:"BUS-06", label:"Bus 06", route:"Girls Hostel → Block C" },
-  { id:"BUS-07", label:"Bus 07", route:"Parking → Library" },
-  { id:"BUS-08", label:"Bus 08", route:"Workshop → Canteen" },
-  { id:"BUS-09", label:"Bus 09", route:"Main Gate → Boys Hostel" },
+  { id:"BUS-01", label:"Bus 01", routeCoords:[[12.9716,77.5946],[12.9730,77.5960],[12.9750,77.5980],[12.9770,77.5990]] },
+  { id:"BUS-02", label:"Bus 02", routeCoords:[[12.9700,77.5920],[12.9710,77.5935],[12.9720,77.5950],[12.9740,77.5960]] },
+  { id:"BUS-03", label:"Bus 03", routeCoords:[[12.9680,77.5900],[12.9695,77.5915],[12.9710,77.5930],[12.9725,77.5945]] },
+  { id:"BUS-04", label:"Bus 04", routeCoords:[[12.9750,77.5910],[12.9755,77.5930],[12.9760,77.5950],[12.9765,77.5970]] },
+  { id:"BUS-05", label:"Bus 05", routeCoords:[[12.9690,77.5950],[12.9700,77.5965],[12.9715,77.5980],[12.9730,77.5995]] },
+  { id:"BUS-06", label:"Bus 06", routeCoords:[[12.9660,77.5940],[12.9675,77.5955],[12.9690,77.5970],[12.9705,77.5985]] },
+  { id:"BUS-07", label:"Bus 07", routeCoords:[[12.9720,77.5900],[12.9728,77.5915],[12.9736,77.5930],[12.9745,77.5942]] },
+  { id:"BUS-08", label:"Bus 08", routeCoords:[[12.9740,77.5870],[12.9748,77.5885],[12.9756,77.5900],[12.9764,77.5915]] },
+  { id:"BUS-09", label:"Bus 09", routeCoords:[[12.9680,77.5870],[12.9692,77.5882],[12.9704,77.5894],[12.9716,77.5906]] },
 ];
+
+/* ── LOCAL FILE DETECTION ── */
+(function(){
+  const p = window.location.protocol;
+  if(p==="file:"||p==="content:"||p==="null:")
+    document.getElementById("local-file-warning").style.display="block";
+})();
 
 /* ── AUTH MODE TOGGLE ── */
 window.toggleAuthMode = () => {
-  authMode = authMode === "signin" ? "signup" : "signin";
-  const isSignup = authMode === "signup";
-  document.getElementById("auth-title").textContent      = isSignup ? "Create Account" : "Welcome back";
-  document.getElementById("auth-sub").textContent        = isSignup ? "Sign up to get started" : "Sign in to access your dashboard";
-  document.getElementById("btn-login").textContent       = isSignup ? "Sign Up →" : "Sign In →";
-  document.getElementById("btn-login").onclick           = isSignup ? doSignup : doLogin;
-  document.getElementById("auth-toggle-text").textContent = isSignup ? "Already have an account?" : "Don't have an account?";
-  document.getElementById("auth-toggle-btn").textContent  = isSignup ? "Sign In" : "Sign Up";
-  document.getElementById("field-confirm").style.display  = isSignup ? "block" : "none";
-  document.getElementById("login-pw").placeholder         = isSignup ? "Create password (6+ chars)" : "Enter password";
-  document.getElementById("login-pw").autocomplete        = isSignup ? "new-password" : "current-password";
+  authMode = authMode==="signin"?"signup":"signin";
+  const s = authMode==="signup";
+  document.getElementById("auth-title").textContent       = s?"Create Account":"Welcome back";
+  document.getElementById("auth-sub").textContent         = s?"Sign up to get started":"Sign in to access your dashboard";
+  document.getElementById("btn-login").textContent        = s?"Sign Up →":"Sign In →";
+  document.getElementById("btn-login").onclick            = s?doSignup:doLogin;
+  document.getElementById("auth-toggle-text").textContent = s?"Already have an account?":"Don't have an account?";
+  document.getElementById("auth-toggle-btn").textContent  = s?"Sign In":"Sign Up";
+  document.getElementById("field-confirm").style.display  = s?"block":"none";
+  document.getElementById("login-pw").placeholder         = s?"Create password (6+ chars)":"Enter password";
+  document.getElementById("login-pw").autocomplete        = s?"new-password":"current-password";
   document.getElementById("login-err").style.display = "none";
-};
-
-/* ── BUS SELECTION SCREEN ── */
-function showBusSelectScreen(){
-  // Set role badge + title
-  const isDriver = currentRole === "driver";
-  const badge = document.getElementById("bs-role-badge");
-  badge.textContent = isDriver ? "🚗 Driver" : "🎓 Student / Faculty";
-  badge.className = "bs-role-badge " + (isDriver ? "bs-role-driver" : "bs-role-student");
-  document.getElementById("bs-title").textContent    = isDriver ? "Select Your Bus" : "Which bus are you tracking?";
-  document.getElementById("bs-subtitle").textContent = isDriver ? "Choose the bus you are driving today" : "Select a bus to follow on the map";
-
-  selectedBusId = null;
-  document.getElementById("bs-confirm-btn").disabled = true;
-  renderBusGrid();
-  showScreen("busselect");
-}
-
-function renderBusGrid(){
-  const grid = document.getElementById("bus-grid");
-  grid.innerHTML = "";
-  BUS_LIST.forEach(bus => {
-    const liveInfo = busesLiveData[bus.id];
-    const isLive   = liveInfo && liveInfo.active === true;
-    const btn = document.createElement("button");
-    btn.className = "bus-btn" + (isLive ? " has-driver" : "");
-    btn.dataset.busId = bus.id;
-    btn.onclick = () => selectBus(bus.id);
-    btn.innerHTML = `
-      <div class="${isLive ? "bus-live-pip" : "bus-offline-pip"}"></div>
-      <span style="font-size:26px;">🚌</span>
-      <span class="bus-number">${bus.label}</span>
-      <span class="bus-route-tag">${bus.route}</span>
-    `;
-    grid.appendChild(btn);
-  });
-}
-
-function selectBus(busId){
-  selectedBusId = busId;
-  document.querySelectorAll(".bus-btn").forEach(b => {
-    b.classList.toggle("selected", b.dataset.busId === busId);
-  });
-  document.getElementById("bs-confirm-btn").disabled = false;
-  const bus = BUS_LIST.find(b => b.id === busId);
-  document.getElementById("bs-confirm-btn").textContent = `Continue with ${bus ? bus.label : busId} →`;
-}
-
-window.confirmBusSelection = () => {
-  if(!selectedBusId) return;
-  if(currentRole === "driver"){
-    const bus = BUS_LIST.find(b => b.id === selectedBusId);
-    document.getElementById("drv-bus-badge").textContent = bus ? bus.label : selectedBusId;
-    document.getElementById("drv-bus-route").textContent = bus ? bus.route : "";
-    document.getElementById("drv-email").textContent = currentUser.email;
-    showScreen("driver");
-  } else {
-    // Student — go to map, highlight the selected bus
-    const bus = BUS_LIST.find(b => b.id === selectedBusId);
-    document.getElementById("sb-selected-bus").style.display = "block";
-    document.getElementById("sb-selected-bus-name").textContent = bus ? `${bus.label} · ${bus.route}` : selectedBusId;
-    showScreen("student");
-    initMap();
-    listenBuses();
-    // After map loads, pan to the selected bus if it's live
-    setTimeout(() => {
-      const liveInfo = busesLiveData[selectedBusId];
-      if(liveInfo && liveInfo.lat && liveInfo.lng){
-        studentMap.flyTo([liveInfo.lat, liveInfo.lng], 16, { duration:1.2 });
-      }
-    }, 600);
-  }
 };
 
 /* ── ROLE SWITCH ── */
 window.switchRole = role => {
   currentRole = role;
-  document.querySelectorAll(".role-tab").forEach((t,i) =>
-    t.classList.toggle("active",
-      (i===0 && role==="driver") || (i===1 && role==="student")));
-  document.getElementById("uid-label").textContent =
-    role==="driver" ? "Driver Email" : "Student / Faculty Email";
+  document.querySelectorAll(".role-tab").forEach((t,i)=>
+    t.classList.toggle("active",(i===0&&role==="driver")||(i===1&&role==="student")));
+  document.getElementById("uid-label").textContent = role==="driver"?"Driver Email":"Student / Faculty Email";
 };
 
 /* ── SIGN UP ── */
 window.doSignup = async () => {
-  const email = document.getElementById("login-email").value.trim();
-  const pw    = document.getElementById("login-pw").value;
-  const pw2   = document.getElementById("login-pw2").value;
-  const err   = document.getElementById("login-err");
-  const btn   = document.getElementById("btn-login");
-  err.style.display = "none";
-  if(!email || !pw || !pw2){ err.textContent = "❌ Please fill in all fields."; err.style.display="block"; return; }
-  if(pw !== pw2){ err.textContent = "❌ Passwords do not match."; err.style.display="block"; return; }
-  if(pw.length < 6){ err.textContent = "❌ Password must be at least 6 characters."; err.style.display="block"; return; }
-  btn.disabled = true; btn.textContent = "Creating account…";
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pw);
-    currentUser = cred.user;
-    await set(ref(db, `users/${currentUser.uid}`), { role: currentRole, email });
-    showToast("🎉 Account created! Welcome to CampusMove.", "success");
+  const email=document.getElementById("login-email").value.trim();
+  const pw=document.getElementById("login-pw").value;
+  const pw2=document.getElementById("login-pw2").value;
+  const err=document.getElementById("login-err");
+  const btn=document.getElementById("btn-login");
+  err.style.display="none";
+  if(!email||!pw||!pw2){err.textContent="❌ Please fill in all fields.";err.style.display="block";return;}
+  if(pw!==pw2){err.textContent="❌ Passwords do not match.";err.style.display="block";return;}
+  if(pw.length<6){err.textContent="❌ Password must be at least 6 characters.";err.style.display="block";return;}
+  btn.disabled=true;btn.textContent="Creating account…";
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,email,pw);
+    currentUser=cred.user;
+    await set(ref(db,`users/${currentUser.uid}`),{role:currentRole,email});
+    showToast("🎉 Account created! Welcome to CampusMove.","success");
     launchDashboard();
-  } catch(e) {
-    err.textContent = "❌ " + friendlySignupErr(e.code);
-    err.style.display = "block";
-  } finally {
-    btn.disabled = false; btn.textContent = "Sign Up →";
-  }
+  }catch(e){err.textContent="❌ "+friendlySignupErr(e.code);err.style.display="block";}
+  finally{btn.disabled=false;btn.textContent="Sign Up →";}
 };
-
 function friendlySignupErr(c){
   if(c==="auth/email-already-in-use") return "This email is already registered. Try signing in.";
   if(c==="auth/invalid-email") return "Invalid email format.";
@@ -647,341 +661,493 @@ function friendlySignupErr(c){
 
 /* ── LOGIN ── */
 window.doLogin = async () => {
-  const email = document.getElementById("login-email").value.trim();
-  const pw    = document.getElementById("login-pw").value;
-  const err   = document.getElementById("login-err");
-  const btn   = document.getElementById("btn-login");
-  err.style.display = "none";
-  if(!email || !pw){ err.textContent = "❌ Please enter email and password."; err.style.display="block"; return; }
-  btn.disabled = true; btn.textContent = "Signing in…";
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, pw);
-    currentUser = cred.user;
-    // Save role mapping in DB
-    await set(ref(db, `users/${currentUser.uid}`), { role: currentRole, email });
+  const email=document.getElementById("login-email").value.trim();
+  const pw=document.getElementById("login-pw").value;
+  const err=document.getElementById("login-err");
+  const btn=document.getElementById("btn-login");
+  err.style.display="none";
+  if(!email||!pw){err.textContent="❌ Please enter email and password.";err.style.display="block";return;}
+  btn.disabled=true;btn.textContent="Signing in…";
+  try{
+    const cred=await signInWithEmailAndPassword(auth,email,pw);
+    currentUser=cred.user;
+    await set(ref(db,`users/${currentUser.uid}`),{role:currentRole,email});
     launchDashboard();
-  } catch(e) {
-    err.textContent = "❌ " + friendlyErr(e.code);
-    err.style.display = "block";
-  } finally {
-    btn.disabled = false; btn.textContent = "Sign In →";
-  }
+  }catch(e){err.textContent="❌ "+friendlyErr(e.code);err.style.display="block";}
+  finally{btn.disabled=false;btn.textContent="Sign In →";}
 };
-document.addEventListener("keydown", e => {
-  if(e.key==="Enter") authMode === "signup" ? window.doSignup() : window.doLogin();
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const s=document.getElementById("screen-admin-login");
+    if(s&&s.classList.contains("active")) window.doAdminLogin();
+    else authMode==="signup"?window.doSignup():window.doLogin();
+  }
 });
-
 function friendlyErr(c){
-  if(["auth/user-not-found","auth/wrong-password","auth/invalid-credential"].includes(c))
-    return "Invalid email or password.";
+  if(["auth/user-not-found","auth/wrong-password","auth/invalid-credential"].includes(c)) return "Invalid email or password.";
   if(c==="auth/invalid-email") return "Invalid email format.";
   if(c==="auth/too-many-requests") return "Too many attempts. Try again later.";
-  if(c==="auth/network-request-failed") return "No internet connection. Check your network and try again.";
-  if(c==="auth/unauthorized-domain") return "This app must be hosted on a server (not opened as a local file). Please host it on GitHub Pages, Firebase Hosting, or a web server.";
-  return `Login failed (${c}). If you opened this as a file, please host it on a web server.`;
+  if(c==="auth/network-request-failed") return "No internet connection. Check your network.";
+  if(c==="auth/unauthorized-domain") return "This app must be hosted on a server, not opened as a local file.";
+  return `Login failed (${c}).`;
 }
 
-onAuthStateChanged(auth, u => { if(!u) showScreen("login"); });
+onAuthStateChanged(auth, u=>{ if(!u && !adminUser) showScreen("login"); });
 
-// Detect if opened as local file (file://, content://, null origin)
-(function detectLocalFile(){
-  const proto = window.location.protocol;
-  if(proto === "file:" || proto === "content:" || proto === "null:") {
-    document.getElementById("local-file-warning").style.display = "block";
-  }
-})();
+/* ── ADMIN LOGIN (separate hardcoded credentials check via Firebase) ── */
+window.doAdminLogin = async () => {
+  const email=document.getElementById("admin-email").value.trim();
+  const pw=document.getElementById("admin-pw").value;
+  const err=document.getElementById("admin-login-err");
+  const btn=document.getElementById("btn-admin-login");
+  err.style.display="none";
+  if(!email||!pw){err.textContent="❌ Enter admin email and password.";err.style.display="block";return;}
+  btn.disabled=true;btn.textContent="Signing in…";
+  try{
+    const cred=await signInWithEmailAndPassword(auth,email,pw);
+    // Check if this user has admin role in the DB
+    const snap=await get(ref(db,`users/${cred.user.uid}`));
+    const userData=snap.val();
+    if(!userData||userData.role!=="admin"){
+      await signOut(auth);
+      err.textContent="❌ This account does not have admin privileges.";
+      err.style.display="block";
+      return;
+    }
+    adminUser=cred.user;
+    showScreen("admin");
+    listenAdminData();
+  }catch(e){err.textContent="❌ "+friendlyErr(e.code);err.style.display="block";}
+  finally{btn.disabled=false;btn.textContent="Sign In as Admin →";}
+};
 
-/* ── LAUNCH ── */
+window.doAdminLogout = async () => {
+  await signOut(auth);
+  adminUser=null;
+  showScreen("login");
+};
+
+/* ── ADMIN DATA LISTENER ── */
+function listenAdminData(){
+  onValue(ref(db,"buses"), snap=>{
+    const data=snap.val()||{};
+    const rows=Object.values(data);
+    const active=rows.filter(b=>b.active===true).length;
+    document.getElementById("stat-active").textContent=active;
+    document.getElementById("stat-total").textContent=rows.length;
+
+    const tbody=document.getElementById("admin-bus-tbody");
+    if(!rows.length){
+      tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted);font-size:12px;text-align:center;padding:20px;">No buses registered yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML=rows.sort((a,b)=>(b.active===true?1:0)-(a.active===true?1:0)).map(bus=>`
+      <tr>
+        <td><b>${bus.busLabel||bus.busId||"—"}</b></td>
+        <td style="color:var(--muted);font-size:12px;">${bus.email||"—"}</td>
+        <td><span class="pill ${bus.active?"pill-green":"pill-muted"}">${bus.active?"● Live":"● Offline"}</span></td>
+        <td style="color:var(--muted);font-size:12px;">${timeAgo(bus.updatedAt)}</td>
+        <td style="font-family:monospace;font-size:11px;color:var(--muted);">${bus.lat?bus.lat.toFixed(4):"—"}, ${bus.lng?bus.lng.toFixed(4):"—"}</td>
+      </tr>`).join("");
+  });
+
+  // Bus list table (static)
+  const listbody=document.getElementById("admin-buslist-tbody");
+  listbody.innerHTML=BUS_LIST.map(b=>`
+    <tr>
+      <td style="font-family:monospace;color:var(--muted);font-size:12px;">${b.id}</td>
+      <td><b>${b.label}</b></td>
+      <td style="font-size:12px;color:var(--muted);">${b.routeCoords.length} waypoints</td>
+      <td><span class="pill ${busesLiveData[b.id]?.active?"pill-green":"pill-muted"}">${busesLiveData[b.id]?.active?"● Live":"● Offline"}</span></td>
+    </tr>`).join("");
+}
+
+/* ── LAUNCH DASHBOARD ── */
 function launchDashboard(){
-  // First load buses data so bus grid shows live status, then show selection screen
-  const busesRef = ref(db, "buses");
-  onValue(busesRef, snap => {
-    const data = snap.val() || {};
-    // Index by busId field stored in firebase
-    busesLiveData = {};
-    Object.values(data).forEach(b => { if(b.busId) busesLiveData[b.busId] = b; });
+  // Preload live bus data then show bus selection
+  onValue(ref(db,"buses"), snap=>{
+    busesLiveData={};
+    const data=snap.val()||{};
+    Object.values(data).forEach(b=>{ if(b.busId) busesLiveData[b.busId]=b; });
   });
   showBusSelectScreen();
 }
 
 /* ── LOGOUT ── */
-window.doLogout = async () => {
+window.doLogout = async ()=>{
   stopTrip();
+  if(etaInterval){clearInterval(etaInterval);etaInterval=null;}
   await signOut(auth);
-  selectedBusId = null;
-  busesLiveData = {};
+  currentUser=null;selectedBusId=null;busesLiveData={};
+  pickupLatLng=null;pickupMode=false;lastNotifDist=Infinity;
   showScreen("login");
-  document.getElementById("login-email").value = "";
-  document.getElementById("login-pw").value = "";
+  document.getElementById("login-email").value="";
+  document.getElementById("login-pw").value="";
 };
 
-/* ────────────────────────────────────────
-   DRIVER — START TRIP
-──────────────────────────────────────── */
-window.startTrip = () => {
-  if(tripActive) return;
-  if(!navigator.geolocation){
-    showToast("❌ Geolocation not supported on this device", "error");
-    return;
+/* ── BUS SELECTION SCREEN ── */
+function showBusSelectScreen(){
+  const isDriver=currentRole==="driver";
+  const badge=document.getElementById("bs-role-badge");
+  badge.textContent=isDriver?"🚗 Driver":"🎓 Student / Faculty";
+  badge.className="bs-role-badge "+(isDriver?"bs-role-driver":"bs-role-student");
+  document.getElementById("bs-title").textContent=isDriver?"Select Your Bus":"Which bus are you taking?";
+  document.getElementById("bs-subtitle").textContent=isDriver?"Choose the bus you are driving today":"Select your bus to see it on the live map";
+  selectedBusId=null;
+  document.getElementById("bs-confirm-btn").disabled=true;
+  document.getElementById("bs-confirm-btn").textContent="Continue →";
+  renderBusGrid();
+  showScreen("busselect");
+}
+
+function renderBusGrid(){
+  const grid=document.getElementById("bus-grid");
+  grid.innerHTML="";
+  BUS_LIST.forEach(bus=>{
+    const liveInfo=busesLiveData[bus.id];
+    const isLive=liveInfo&&liveInfo.active===true;
+    const btn=document.createElement("button");
+    btn.className="bus-btn"+(isLive?" has-driver":"");
+    btn.dataset.busId=bus.id;
+    btn.onclick=()=>selectBus(bus.id);
+    // NO route text shown on the grid cards — just number and live status
+    btn.innerHTML=`
+      <div class="${isLive?"bus-live-pip":"bus-offline-pip"}"></div>
+      <span style="font-size:26px;">🚌</span>
+      <span class="bus-number">${bus.label}</span>
+    `;
+    grid.appendChild(btn);
+  });
+}
+
+function selectBus(busId){
+  selectedBusId=busId;
+  document.querySelectorAll(".bus-btn").forEach(b=>b.classList.toggle("selected",b.dataset.busId===busId));
+  document.getElementById("bs-confirm-btn").disabled=false;
+  const bus=BUS_LIST.find(b=>b.id===busId);
+  document.getElementById("bs-confirm-btn").textContent=`Continue with ${bus?bus.label:busId} →`;
+}
+
+window.confirmBusSelection = ()=>{
+  if(!selectedBusId) return;
+  if(currentRole==="driver"){
+    const bus=BUS_LIST.find(b=>b.id===selectedBusId);
+    document.getElementById("drv-bus-badge").textContent=bus?bus.label:selectedBusId;
+    document.getElementById("drv-email").textContent=currentUser.email;
+    showScreen("driver");
+  } else {
+    const bus=BUS_LIST.find(b=>b.id===selectedBusId);
+    document.getElementById("sb-selected-bus").style.display="block";
+    document.getElementById("sb-selected-bus-name").textContent=bus?bus.label:selectedBusId;
+    document.getElementById("eta-bar").style.display="block";
+    showScreen("student");
+    initMap();
+    listenMyBus(); // Only listen to selected bus
+    setTimeout(()=>{
+      const liveInfo=busesLiveData[selectedBusId];
+      if(liveInfo&&liveInfo.lat&&liveInfo.lng)
+        studentMap.flyTo([liveInfo.lat,liveInfo.lng],16,{duration:1.2});
+    },600);
   }
-  tripActive  = true;
-  updateCount = 0;
-  tripStart   = Date.now();
-  setDriverUI(true);
-  showToast("📡 Trip started! Broadcasting GPS to students…", "success");
-  timerInterval = setInterval(tickTimer, 1000);
-
-  gpsWatchId = navigator.geolocation.watchPosition(
-    pos => {
-      const { latitude:lat, longitude:lng, accuracy } = pos.coords;
-
-      // ✅ Write real GPS to Firebase — students see this instantly
-      const busInfo = BUS_LIST.find(b => b.id === selectedBusId) || {};
-      set(ref(db, `buses/${currentUser.uid}`), {
-        uid: currentUser.uid,
-        email: currentUser.email,
-        busId: selectedBusId || "UNKNOWN",
-        busLabel: busInfo.label || selectedBusId || "Bus",
-        busRoute: busInfo.route || "",
-        lat, lng,
-        accuracy: Math.round(accuracy),
-        active: true,
-        updatedAt: Date.now()
-      });
-
-      // Update driver screen
-      document.getElementById("coord-lat").textContent = lat.toFixed(6);
-      document.getElementById("coord-lng").textContent = lng.toFixed(6);
-      document.getElementById("coord-acc").textContent = Math.round(accuracy)+" m";
-      updateCount++;
-      document.getElementById("coord-updates").textContent = updateCount;
-      ["coord-lat","coord-lng","coord-acc","coord-updates"]
-        .forEach(id => document.getElementById(id).classList.remove("dim"));
-    },
-    err => {
-      showToast("⚠️ GPS error: "+err.message, "error");
-    },
-    { enableHighAccuracy:true, maximumAge:3000, timeout:10000 }
-  );
 };
 
-/* ── STOP TRIP ── */
-window.stopTrip = () => {
-  if(!tripActive && gpsWatchId===null) return;
-  tripActive = false;
-  if(gpsWatchId!==null){ navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId=null; }
-  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+/* ──────────────────────────────────────────
+   DRIVER GPS
+──────────────────────────────────────────*/
+window.startTrip = ()=>{
+  if(tripActive) return;
+  if(!navigator.geolocation){showToast("❌ Geolocation not supported","error");return;}
+  tripActive=true;updateCount=0;tripStart=Date.now();
+  setDriverUI(true);
+  showToast("📡 Trip started! Broadcasting GPS…","success");
+  timerInterval=setInterval(tickTimer,1000);
+  gpsWatchId=navigator.geolocation.watchPosition(pos=>{
+    const {latitude:lat,longitude:lng,accuracy}=pos.coords;
+    const busInfo=BUS_LIST.find(b=>b.id===selectedBusId)||{};
+    set(ref(db,`buses/${currentUser.uid}`),{
+      uid:currentUser.uid, email:currentUser.email,
+      busId:selectedBusId||"UNKNOWN",
+      busLabel:busInfo.label||selectedBusId||"Bus",
+      lat, lng,
+      accuracy:Math.round(accuracy),
+      active:true, updatedAt:Date.now()
+    });
+    document.getElementById("coord-lat").textContent=lat.toFixed(6);
+    document.getElementById("coord-lng").textContent=lng.toFixed(6);
+    document.getElementById("coord-acc").textContent=Math.round(accuracy)+"m";
+    updateCount++;
+    document.getElementById("coord-updates").textContent=updateCount;
+    ["coord-lat","coord-lng","coord-acc","coord-updates"].forEach(id=>document.getElementById(id).classList.remove("dim"));
+  },
+  err=>showToast("⚠️ GPS error: "+err.message,"error"),
+  {enableHighAccuracy:true,maximumAge:3000,timeout:10000});
+};
+
+window.stopTrip = ()=>{
+  if(!tripActive&&gpsWatchId===null) return;
+  tripActive=false;
+  if(gpsWatchId!==null){navigator.geolocation.clearWatch(gpsWatchId);gpsWatchId=null;}
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
   if(currentUser){
-    set(ref(db, `buses/${currentUser.uid}`), {
-      uid: currentUser.uid,
-      email: currentUser.email,
-      busId: selectedBusId || "UNKNOWN",
-      busLabel: (BUS_LIST.find(b=>b.id===selectedBusId)||{}).label || selectedBusId || "Bus",
-      busRoute: (BUS_LIST.find(b=>b.id===selectedBusId)||{}).route || "",
-      lat: null, lng: null,
-      active: false,
-      updatedAt: Date.now()
+    set(ref(db,`buses/${currentUser.uid}`),{
+      uid:currentUser.uid, email:currentUser.email,
+      busId:selectedBusId||"UNKNOWN",
+      busLabel:(BUS_LIST.find(b=>b.id===selectedBusId)||{}).label||selectedBusId||"Bus",
+      lat:null, lng:null, active:false, updatedAt:Date.now()
     });
   }
   setDriverUI(false);
-  ["coord-lat","coord-lng","coord-acc"].forEach(id => {
-    document.getElementById(id).textContent = "—";
-    document.getElementById(id).classList.add("dim");
-  });
-  document.getElementById("coord-updates").textContent = "0";
-  document.getElementById("trip-timer").textContent = "00:00:00";
-  showToast("✅ Trip ended successfully.", "success");
+  ["coord-lat","coord-lng","coord-acc"].forEach(id=>{document.getElementById(id).textContent="—";document.getElementById(id).classList.add("dim");});
+  document.getElementById("coord-updates").textContent="0";
+  document.getElementById("trip-timer").textContent="00:00:00";
+  showToast("✅ Trip ended successfully.","success");
 };
 
 function setDriverUI(on){
-  document.getElementById("btn-start").disabled = on;
-  document.getElementById("btn-stop").disabled  = !on;
-  document.getElementById("trip-dot").className = "dot"+(on?" on":"");
-  document.getElementById("trip-txt").textContent = on?"Trip Active":"Trip Inactive";
-  document.getElementById("gps-dot").className  = "dot"+(on?" gps":"");
-  document.getElementById("gps-txt").textContent  = on?"GPS Active":"GPS Standby";
+  document.getElementById("btn-start").disabled=on;
+  document.getElementById("btn-stop").disabled=!on;
+  document.getElementById("trip-dot").className="dot"+(on?" on":"");
+  document.getElementById("trip-txt").textContent=on?"Trip Active":"Trip Inactive";
+  document.getElementById("gps-dot").className="dot"+(on?" gps":"");
+  document.getElementById("gps-txt").textContent=on?"GPS Active":"GPS Standby";
 }
-
 function tickTimer(){
-  const s   = Math.floor((Date.now()-tripStart)/1000);
-  const h   = String(Math.floor(s/3600)).padStart(2,"0");
-  const m   = String(Math.floor((s%3600)/60)).padStart(2,"0");
-  const sec = String(s%60).padStart(2,"0");
-  document.getElementById("trip-timer").textContent = `${h}:${m}:${sec}`;
+  const s=Math.floor((Date.now()-tripStart)/1000);
+  const h=String(Math.floor(s/3600)).padStart(2,"0");
+  const m=String(Math.floor((s%3600)/60)).padStart(2,"0");
+  const sc=String(s%60).padStart(2,"0");
+  document.getElementById("trip-timer").textContent=`${h}:${m}:${sc}`;
 }
 
-/* ────────────────────────────────────────
-   STUDENT — LEAFLET MAP
-──────────────────────────────────────── */
+/* ──────────────────────────────────────────
+   STUDENT MAP
+──────────────────────────────────────────*/
 function initMap(){
   if(studentMap) return;
-  studentMap = L.map("leaflet-map",{ zoomControl:true }).setView([12.9716,77.5946],13);
+  studentMap=L.map("leaflet-map",{zoomControl:true}).setView([12.9716,77.5946],14);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
     attribution:"© OpenStreetMap contributors", maxZoom:19
   }).addTo(studentMap);
+
+  // Click on map to set pickup point
+  studentMap.on("click", e=>{
+    if(!pickupMode) return;
+    setPickupPoint(e.latlng.lat, e.latlng.lng);
+    togglePickupMode(); // exit mode after placing
+  });
 }
 
-/* ── LISTEN TO ALL BUSES LIVE ── */
-function listenBuses(){
-  const busesRef = ref(db,"buses");
-  onValue(busesRef, snap => {
-    const data = snap.val();
-    const list = document.getElementById("bus-list");
-    const noMsg = document.getElementById("no-buses-msg");
+/* Draw/update route polyline for selected bus */
+function drawRoute(){
+  if(!studentMap||!selectedBusId) return;
+  if(routePolyline){ studentMap.removeLayer(routePolyline); routePolyline=null; }
+  const bus=BUS_LIST.find(b=>b.id===selectedBusId);
+  if(!bus||!bus.routeCoords||!bus.routeCoords.length) return;
+  routePolyline=L.polyline(bus.routeCoords,{
+    color:"#00d4ff", weight:4, opacity:0.7,
+    dashArray:"8,6", lineCap:"round"
+  }).addTo(studentMap);
+  // Add start/end markers
+  const coords=bus.routeCoords;
+  L.circleMarker(coords[0],{radius:7,color:"#00e676",fillColor:"#00e676",fillOpacity:1,weight:2}).addTo(studentMap).bindTooltip("Start",{permanent:false});
+  L.circleMarker(coords[coords.length-1],{radius:7,color:"#ff6b35",fillColor:"#ff6b35",fillOpacity:1,weight:2}).addTo(studentMap).bindTooltip("End",{permanent:false});
+}
 
-    // Keep busesLiveData in sync (used by bus selection grid)
-    busesLiveData = {};
-    if(data) Object.values(data).forEach(b => { if(b.busId) busesLiveData[b.busId] = b; });
+/* Listen only to this student's selected bus */
+function listenMyBus(){
+  // Find the driver uid for our bus from initial snapshot, then watch it
+  onValue(ref(db,"buses"), snap=>{
+    const data=snap.val();
+    const list=document.getElementById("bus-list");
+    const noMsg=document.getElementById("no-buses-msg");
+    // Update global live data
+    busesLiveData={};
+    if(data) Object.values(data).forEach(b=>{ if(b.busId) busesLiveData[b.busId]=b; });
 
-    if(!data){
-      Object.values(busMarkers).forEach(m => studentMap.removeLayer(m));
-      busMarkers = {};
-      list.innerHTML = "";
-      list.appendChild(noMsg);
-      noMsg.style.display = "flex";
-      return;
-    }
+    if(!data){ noMsg.style.display="flex"; return; }
 
-    noMsg.style.display = "none";
-
-    // Remove stale markers
-    Object.keys(busMarkers).forEach(id => {
-      if(!data[id]){ studentMap.removeLayer(busMarkers[id]); delete busMarkers[id]; }
+    // Find entries matching our selected bus only
+    const myBusEntries=Object.entries(data).filter(([,b])=>b.busId===selectedBusId);
+    // Remove markers for buses that are NOT our bus
+    Object.keys(busMarkers).forEach(uid=>{
+      if(!myBusEntries.find(([u])=>u===uid)){
+        studentMap.removeLayer(busMarkers[uid]);
+        delete busMarkers[uid];
+      }
     });
 
-    // Update / add markers and sidebar
-    Object.entries(data).forEach(([uid, bus]) => placeBus(uid, bus));
-    renderSidebar(data);
+    if(!myBusEntries.length){
+      noMsg.style.display="flex";
+      [...list.children].forEach(c=>{if(c!==noMsg)c.remove();});
+      updateETA(null);
+      return;
+    }
+    noMsg.style.display="none";
+
+    // Draw route polyline once
+    drawRoute();
+
+    myBusEntries.forEach(([uid,bus])=>placeBus(uid,bus));
+    renderSidebar(myBusEntries);
+
+    // Update ETA for the first (only) active bus entry
+    const activeBus=myBusEntries.find(([,b])=>b.active===true);
+    updateETA(activeBus?activeBus[1]:null);
   });
 }
 
 function placeBus(uid, bus){
-  if(!bus.lat || !bus.lng) return;
-  // Use busLabel from Firebase if available, fall back to bus number or email
-  const name    = bus.busLabel || bus.busId || (bus.email ? bus.email.split("@")[0] : "Bus");
-  const route   = bus.busRoute || "";
-  const isLive  = bus.active === true;
-  const isSelected = bus.busId && bus.busId === selectedBusId;
-  const color   = isLive ? (isSelected ? "#00d4ff" : "#ff6b35") : "#6b7fa3";
-  const glow    = isLive
-    ? (isSelected
-        ? "0 0 0 6px rgba(0,212,255,.3),0 0 24px rgba(0,212,255,.5)"
-        : "0 0 0 6px rgba(255,107,53,.25),0 0 20px rgba(255,107,53,.4)")
-    : "none";
+  if(!bus.lat||!bus.lng) return;
+  const name=bus.busLabel||bus.busId||"Bus";
+  const isLive=bus.active===true;
+  const color=isLive?"#00d4ff":"#6b7fa3";
+  const glow=isLive?"0 0 0 6px rgba(0,212,255,.3),0 0 24px rgba(0,212,255,.5)":"none";
 
-  const icon = L.divIcon({
+  const icon=L.divIcon({
     className:"",
     html:`<div style="display:flex;flex-direction:column;align-items:center;">
-      <div style="
-        width:44px;height:44px;border-radius:50%;
-        background:${color};
-        display:flex;align-items:center;justify-content:center;
-        font-size:22px;border:2px solid #fff;
-        box-shadow:${glow};
-        transition:all .3s;
-      ">🚌</div>
-      <div style="
-        background:${color};color:#fff;
-        font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;
-        padding:3px 9px;border-radius:6px;margin-top:3px;
-        white-space:nowrap;
-      ">${name}</div>
+      <div style="width:44px;height:44px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #fff;box-shadow:${glow};">🚌</div>
+      <div style="background:${color};color:#fff;font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;padding:3px 9px;border-radius:6px;margin-top:3px;white-space:nowrap;">${name}</div>
     </div>`,
     iconSize:[64,60], iconAnchor:[32,30]
   });
 
-  const popupContent = `
-    <div style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.9;">
-      <b style="font-size:15px;">🚌 ${name}</b><br>
-      ${route ? `<span style="color:#6b7fa3;font-size:11px;">📍 ${route}</span><br>` : ""}
-      Status: <b style="color:${isLive?"#00e676":"#6b7fa3"}">${isLive?"● Live":"● Offline"}</b><br>
-      Lat: ${bus.lat.toFixed(5)}<br>
-      Lng: ${bus.lng.toFixed(5)}<br>
-      Updated: ${timeAgo(bus.updatedAt)}
-    </div>`;
+  const popup=`<div style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.9;">
+    <b style="font-size:15px;">🚌 ${name}</b><br>
+    Status: <b style="color:${isLive?"#00e676":"#6b7fa3"}">${isLive?"● Live":"● Offline"}</b><br>
+    Lat: ${bus.lat.toFixed(5)} | Lng: ${bus.lng.toFixed(5)}<br>
+    Updated: ${timeAgo(bus.updatedAt)}
+  </div>`;
 
   if(busMarkers[uid]){
-    busMarkers[uid].setLatLng([bus.lat, bus.lng]);
+    busMarkers[uid].setLatLng([bus.lat,bus.lng]);
     busMarkers[uid].setIcon(icon);
-    busMarkers[uid].setPopupContent(popupContent);
+    busMarkers[uid].setPopupContent(popup);
   } else {
-    busMarkers[uid] = L.marker([bus.lat, bus.lng], { icon })
-      .addTo(studentMap)
-      .bindPopup(popupContent);
+    busMarkers[uid]=L.marker([bus.lat,bus.lng],{icon}).addTo(studentMap).bindPopup(popup);
   }
-
-  // Auto-pan: always pan to the student's selected bus if it's live
-  if(isLive && isSelected){
-    studentMap.panTo([bus.lat, bus.lng], { animate:true, duration:1 });
-  } else if(isLive && !selectedBusId){
-    studentMap.panTo([bus.lat, bus.lng], { animate:true, duration:1 });
-  }
+  if(isLive && !pickupMode)
+    studentMap.panTo([bus.lat,bus.lng],{animate:true,duration:1});
 }
 
-function renderSidebar(data){
-  const list  = document.getElementById("bus-list");
-  const noMsg = document.getElementById("no-buses-msg");
-  [...list.children].forEach(c => { if(c !== noMsg) c.remove(); });
-
-  // Sort: selected bus first, then live buses, then offline
-  const entries = Object.entries(data).sort(([,a],[,b]) => {
-    const aSelected = a.busId === selectedBusId ? 1 : 0;
-    const bSelected = b.busId === selectedBusId ? 1 : 0;
-    if(bSelected !== aSelected) return bSelected - aSelected;
-    return (b.active===true ? 1:0) - (a.active===true ? 1:0);
-  });
-
-  entries.forEach(([uid, bus]) => {
-    const name    = bus.busLabel || bus.busId || (bus.email ? bus.email.split("@")[0] : "Bus");
-    const route   = bus.busRoute || "";
-    const isLive  = bus.active === true;
-    const isTracked = bus.busId && bus.busId === selectedBusId;
-    const div     = document.createElement("div");
-    div.className = "bus-item" + (isLive ? " live" : "") + (isTracked ? " tracked" : "");
-    div.onclick   = () => {
-      if(bus.lat && bus.lng) studentMap.flyTo([bus.lat, bus.lng], 16, { duration:1.2 });
-    };
-    div.innerHTML = `
+function renderSidebar(entries){
+  const list=document.getElementById("bus-list");
+  const noMsg=document.getElementById("no-buses-msg");
+  [...list.children].forEach(c=>{if(c!==noMsg)c.remove();});
+  entries.forEach(([uid,bus])=>{
+    const name=bus.busLabel||bus.busId||(bus.email?bus.email.split("@")[0]:"Bus");
+    const isLive=bus.active===true;
+    const div=document.createElement("div");
+    div.className="bus-item live tracked";
+    div.onclick=()=>{if(bus.lat&&bus.lng)studentMap.flyTo([bus.lat,bus.lng],16,{duration:1.2});};
+    div.innerHTML=`
       <div class="bi-top">
         <span class="bi-name">🚌 ${name}</span>
         <span class="bi-badge ${isLive?"bi-live":"bi-off"}">${isLive?"● Live":"● Offline"}</span>
       </div>
-      ${isTracked ? '<div style="font-size:10px;color:var(--accent);margin-bottom:3px;">📍 Your tracked bus</div>' : ""}
-      ${route ? `<div class="bi-sub">🗺 ${route}</div>` : ""}
+      <div style="font-size:10px;color:var(--accent);margin-bottom:4px;">📍 Your tracked bus</div>
       <div class="bi-sub">Updated: ${timeAgo(bus.updatedAt)}</div>
-      <div class="bi-coords">${bus.lat?.toFixed(4) ?? "—"}, ${bus.lng?.toFixed(4) ?? "—"}</div>`;
-    list.insertBefore(div, noMsg);
+      <div class="bi-coords">${bus.lat?.toFixed(4)??"—"}, ${bus.lng?.toFixed(4)??"—"}</div>`;
+    list.insertBefore(div,noMsg);
   });
 }
 
+/* ── PICKUP POINT & ETA ── */
+window.togglePickupMode = ()=>{
+  pickupMode=!pickupMode;
+  document.getElementById("pickup-hint").style.display=pickupMode?"block":"none";
+  document.getElementById("eta-pickup-btn").textContent=pickupMode?"✕ Cancel":"📍 Set Stop";
+  if(pickupMode) showToast("📍 Tap on the map to set your pickup point","");
+};
+
+function setPickupPoint(lat,lng){
+  pickupLatLng={lat,lng};
+  if(pickupMarker) studentMap.removeLayer(pickupMarker);
+  pickupMarker=L.marker([lat,lng],{
+    icon:L.divIcon({
+      className:"",
+      html:`<div style="display:flex;flex-direction:column;align-items:center;">
+        <div style="width:32px;height:32px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,204,0,.3);">📍</div>
+        <div style="background:#ffcc00;color:#000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;margin-top:2px;">My Stop</div>
+      </div>`,
+      iconSize:[48,44],iconAnchor:[24,22]
+    })
+  }).addTo(studentMap).bindPopup("📍 Your pickup stop");
+  document.getElementById("pickup-hint").style.display="none";
+  showToast("✅ Pickup stop set! ETA will calculate when bus is live.","success");
+}
+
+function updateETA(bus){
+  const etaVal=document.getElementById("eta-value");
+  const etaSub=document.getElementById("eta-sub");
+  if(!bus||!bus.active||!bus.lat||!bus.lng){
+    etaVal.textContent="—";
+    etaSub.textContent="Bus is not live yet";
+    return;
+  }
+  if(!pickupLatLng){
+    etaVal.textContent="—";
+    etaSub.textContent="Set a pickup point on the map ↑";
+    return;
+  }
+  const dist=haversineKm(bus.lat,bus.lng,pickupLatLng.lat,pickupLatLng.lng);
+  const speedKmh=30; // assumed avg campus bus speed
+  const mins=Math.round((dist/speedKmh)*60);
+  etaVal.textContent=mins<1?"< 1 min":mins+" min";
+  etaSub.textContent=`Bus is ${(dist*1000).toFixed(0)}m away`;
+
+  // Push-style notification
+  if(dist<0.3&&lastNotifDist>=0.3) showNotif("🚌 Your bus is less than 300m away!","near");
+  if(dist<0.05&&lastNotifDist>=0.05) showNotif("🚌 Bus arriving now!","arrived");
+  lastNotifDist=dist;
+}
+
+function haversineKm(lat1,lon1,lat2,lon2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function showNotif(msg,type){
+  const b=document.getElementById("notif-banner");
+  b.textContent=msg; b.className="notif-banner show "+(type||"");
+  clearTimeout(b._t);
+  b._t=setTimeout(()=>b.classList.remove("show"),5000);
+}
+
+/* ── HELPERS ── */
 function timeAgo(ts){
   if(!ts) return "unknown";
-  const s = Math.floor((Date.now()-ts)/1000);
-  if(s<10)  return "just now";
-  if(s<60)  return s+"s ago";
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<10) return "just now";
+  if(s<60) return s+"s ago";
   if(s<3600) return Math.floor(s/60)+"m ago";
   return Math.floor(s/3600)+"h ago";
 }
 
-/* ── HELPERS ── */
-function showScreen(name){
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("screen-"+name).classList.add("active");
-  if(name==="student" && studentMap)
-    setTimeout(() => studentMap.invalidateSize(), 150);
-}
-
-window.showToast = function(msg, type=""){
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.className = "toast show "+type;
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove("show"), 3500);
+window.showScreen = function(name){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const el=document.getElementById("screen-"+name);
+  if(el) el.classList.add("active");
+  if(name==="student"&&studentMap) setTimeout(()=>studentMap.invalidateSize(),150);
 };
 
-/* expose for HTML onclick */
-window.doLogout = window.doLogout;
-window.startTrip = window.startTrip;
-window.stopTrip = window.stopTrip;
+window.showToast = function(msg,type){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className="toast show "+(type||"");
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove("show"),3500);
+};
+
+window.doLogout=window.doLogout;
+window.startTrip=window.startTrip;
+window.stopTrip=window.stopTrip;
+window.togglePickupMode=window.togglePickupMode;
+window.confirmBusSelection=window.confirmBusSelection;
+window.switchRole=window.switchRole;
+window.toggleAuthMode=window.toggleAuthMode;
+window.doAdminLogin=window.doAdminLogin;
+window.doAdminLogout=window.doAdminLogout;
 </script>
 </body>
 </html>
